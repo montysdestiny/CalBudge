@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Inter Variable', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Formal navy/gold palette. Every color used anywhere in the app is a
+     token here — components reference these, never a raw hex — so the
+     whole scheme can be re-tuned from this one block. */
+  --color-ink: #1B2A4A;
+  --color-paper: #F4F6F9;
+  --color-deficit: #8C3A3A;
+  --color-muted-text: #5B6472;
+  --color-hint-text: #8891A3;
+  --color-onink-text: #B9C2D1;
+  --color-hover-tint: #E4E8F0;
+  --color-ink-hover: #344466;
+  --color-disabled: #A9AFBC;
+  --color-focus-bg: #F8FAFC;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-line: var(--line);
+  --color-surplus: var(--surplus);
+  --radius-lg: var(--radius);
+  --radius-md: var(--radius);
+  --radius-sm: var(--radius);
+}
+
+/*
+ * CalBudge palette mapped onto shadcn's semantic tokens, so imported
+ * components (Button, kokonut's magnet-button) render in our navy/gold
+ * colors instead of the default neutral theme. Single-theme by design —
+ * no .dark overrides (see design_spec.md).
+ */
+:root {
+  --background: #F4F6F9; /* paper */
+  --foreground: #1B2A4A; /* ink (navy) */
+  --primary: #1B2A4A;
+  --primary-foreground: #F4F6F9;
+  --secondary: #F4F6F9;
+  --secondary-foreground: #1B2A4A;
+  --muted: #E4E8F0;
+  --muted-foreground: #5B6472;
+  --accent: #C9A227; /* formal gold */
+  --accent-foreground: #1B2A4A;
+  --destructive: #8C3A3A;
+  --border: #1B2A4A;
+  --input: #C7CEDA;
+  --ring: #C9A227;
+  --line: #C7CEDA;
+  --surplus: #2F5233;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+}
+
+@keyframes block-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-block-in {
+  animation: block-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition: none !important;
+  }
+}

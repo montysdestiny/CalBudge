@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#1B2A4A" />
+  <rect x="48" y="48" width="1104" height="534" fill="none" stroke="#344466" stroke-width="2" />
+  <text x="96" y="300" font-family="Helvetica, Arial, sans-serif" font-size="88" font-weight="700" fill="#F4F6F9">CalBudge</text>
+  <rect x="98" y="330" width="120" height="6" fill="#C9A227" />
+  <text x="96" y="392" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="#B9C2D1">A ledger-precise calorie &amp; macro budget</text>
+  <text x="96" y="440" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="#B9C2D1">built around your numbers.</text>
+</svg>
