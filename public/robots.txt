@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cal-budge.vercel.app/sitemap.xml
