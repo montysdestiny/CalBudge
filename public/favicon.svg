@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <rect width="48" height="48" fill="#1B2A4A" />
-  <text x="24" y="34" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#C9A227" text-anchor="middle">C</text>
+  <circle cx="24" cy="24" r="14" fill="none" stroke="#3a4d75" stroke-width="6" />
+  <circle cx="24" cy="24" r="14" fill="none" stroke="#C9A227" stroke-width="6" stroke-linecap="round" stroke-dasharray="61 88" transform="rotate(-90 24 24)" />
 </svg>
