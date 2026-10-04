@@ -44,7 +44,7 @@
 
 /*
  * CalBudge palette mapped onto shadcn's semantic tokens, so imported
- * components (Button, kokonut's magnet-button) render in our navy/gold
+ * components (Button, ToggleGroup) render in our navy/gold
  * colors instead of the default neutral theme. Single-theme by design —
  * no .dark overrides (see design_spec.md).
  */

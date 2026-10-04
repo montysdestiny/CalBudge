@@ -84,10 +84,10 @@ export default function ExportAppCard({ name, initials, destination, onCopy }: E
           {status === "copied" ? (
             <>
               <Check aria-hidden="true" className="h-4 w-4 text-accent" />
-              <span className="text-xs font-medium text-onink-text">Copied — paste into {destination}</span>
+              <span className="text-xs font-medium text-onink-text">Copied. Paste into {destination}</span>
             </>
           ) : status === "error" ? (
-            <span className="text-xs font-medium text-onink-text">Couldn't copy — select the text manually</span>
+            <span className="text-xs font-medium text-onink-text">Couldn't copy. Select the text manually.</span>
           ) : (
             <span className="text-xs font-medium text-onink-text">Tap to copy for {destination}</span>
           )}

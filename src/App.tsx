@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   Block,
+  Button,
   ENTRANCE_DURATION_MS,
   ErrorText,
   Field,
@@ -11,14 +12,8 @@ import {
   ToggleGroup,
   staggerDelay,
 } from '@/components/Blocks';
-import energizerSvg from '@/assets/energizer.svg';
-import personalTrainerSvg from '@/assets/personal-trainer.svg';
-import AITextLoading from '@/components/kokonutui/ai-text-loading';
-import BudgetLoadingPaths from '@/components/kokonutui/budget-loading-paths';
 import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
-import IntroFlipCard from '@/components/kokonutui/intro-flip-card';
-import MagnetButton from '@/components/kokonutui/magnet-button';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
 import { EXTERNAL_APPS, copyTargetsForApp } from '@/lib/appExport';
@@ -48,7 +43,6 @@ type StepId =
   | 'goal'
   | 'pace'
   | 'goal-estimate'
-  | 'loading'
   | 'result';
 
 interface HistoryEntry {
@@ -121,44 +115,31 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-25">
-        <BudgetLoadingPaths />
-      </div>
-      <img
-        src={personalTrainerSvg}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed -bottom-16 -left-16 z-0 hidden w-[380px] opacity-[0.07] lg:block"
-      />
-      <img
-        src={energizerSvg}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed top-20 right-6 z-0 hidden w-[190px] opacity-[0.07] lg:block"
-      />
-
-      <header className="relative z-10 flex items-center justify-end border-b-2 border-ink bg-paper px-6 py-5">
-        <MagnetButton
-          variant="outline"
-          particleCount={5}
-          onClick={() => setState(s => ({ ...s, unitSystem: s.unitSystem === 'metric' ? 'imperial' : 'metric' }))}
-          className="px-3.5 py-1.5 text-[0.8125rem] capitalize"
-        >
-          {state.unitSystem}
-        </MagnetButton>
+      <header className="border-b border-line bg-paper">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+          <button
+            type="button"
+            onClick={() => {
+              restart();
+              goTo('welcome');
+            }}
+            className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-ink"
+            aria-label="CalBudge home"
+          >
+            <LogoMark />
+            <span className="text-lg font-bold tracking-tight">CalBudge</span>
+          </button>
+          <UnitSwitch
+            imperial={imperial}
+            onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
+          />
+        </div>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[560px]">
+      <main className="flex flex-1 items-center justify-center px-6 py-10">
+        <div className={`w-full ${stepId === 'welcome' ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
           {stepId === 'welcome' ? (
-            <IntroFlipCard
-              title="Ready to calculate your budget?"
-              subtitle="Hover or tap to see how it works."
-              description="Answer a few quick questions about yourself and your training, and get a daily calorie target with a meal-by-meal split."
-              features={['BMR & TDEE calculated for you', 'Meal-by-meal calorie split', 'Macro estimate from your bodyweight']}
-              cta="Let's start"
-              onStart={() => goTo('entry')}
-            />
+            <Welcome onStart={() => goTo('entry')} />
           ) : (
             <>
               {history.map((h, idx) => (
@@ -249,7 +230,7 @@ export default function App() {
                   return next;
                 });
                 pushSummary('Goal', goal[0].toUpperCase() + goal.slice(1), 'goal');
-                goTo(goal === 'maintain' ? 'loading' : 'pace');
+                goTo(goal === 'maintain' ? 'result' : 'pace');
               }}
             />
           )}
@@ -276,12 +257,11 @@ export default function App() {
                 if (targetWeightRaw != null) {
                   pushSummary('Target weight', `${targetWeightRaw}${imperial ? 'lb' : 'kg'}`, 'goal-estimate');
                 }
-                goTo('loading');
+                goTo('result');
               }}
             />
           )}
 
-          {stepId === 'loading' && <StepLoading onDone={() => goTo('result')} />}
 
           {stepId === 'result' && <StepResult state={state} historyLength={history.length} onRestart={restart} />}
               </Block>
@@ -290,10 +270,93 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="relative z-10 border-t-2 border-ink bg-paper px-6 py-4 text-center text-xs text-hint-text">
-        Estimates for informational purposes only — not medical advice. Consult a healthcare professional before changing your diet.
+      <footer className="border-t border-line bg-paper px-6 py-4 text-center text-xs text-hint-text">
+        Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before changing your diet.
       </footer>
     </div>
+  );
+}
+
+// ---- Header pieces ----
+
+function LogoMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="h-8 w-8" aria-hidden="true">
+      <rect width="48" height="48" rx="10" fill="var(--color-ink)" />
+      <circle cx="24" cy="24" r="14" fill="none" stroke="#3a4d75" strokeWidth="6" />
+      <circle
+        cx="24"
+        cy="24"
+        r="14"
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeDasharray="61 88"
+        transform="rotate(-90 24 24)"
+      />
+    </svg>
+  );
+}
+
+function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (imperial: boolean) => void }) {
+  const options = [
+    { label: 'kg / cm', value: false },
+    { label: 'lb / in', value: true },
+  ];
+  return (
+    <div role="group" aria-label="Units" className="flex rounded-lg border border-line bg-paper p-0.5 text-[0.8125rem] font-medium">
+      {options.map(opt => {
+        const selected = imperial === opt.value;
+        return (
+          <button
+            key={opt.label}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => onChange(opt.value)}
+            className={
+              'cursor-pointer rounded-md border-none px-3 py-1.5 transition-colors duration-150 ' +
+              (selected ? 'bg-ink text-paper' : 'bg-transparent text-muted-text hover:text-ink')
+            }
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---- Welcome ----
+
+const FEATURES = [
+  { title: 'BMR & TDEE', body: 'Worked out from your age, size and training, or enter your own.' },
+  { title: 'Meal-by-meal split', body: 'Your daily target divided across meals, snacks and workout fuel.' },
+  { title: 'Macro estimate', body: 'Protein, carbs and fat based on your bodyweight.' },
+];
+
+function Welcome({ onStart }: { onStart: () => void }) {
+  return (
+    <section className="animate-block-in">
+      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+        Your daily calorie budget, split meal by meal.
+      </h1>
+      <p className="mt-4 text-lg text-muted-text">
+        Answer a few questions about your body and training. Get a daily calorie target you can actually plan around.
+        Takes about a minute, no signup.
+      </p>
+      <Button className="mt-8" onClick={onStart}>
+        Calculate my budget
+      </Button>
+      <ul className="mt-12 grid gap-6 border-t border-line pt-6 sm:grid-cols-3">
+        {FEATURES.map(f => (
+          <li key={f.title}>
+            <div className="text-sm font-bold text-ink">{f.title}</div>
+            <p className="mt-1 text-sm text-muted-text">{f.body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -304,8 +367,8 @@ function StepEntry({ onYes, onNo }: { onYes: () => void; onNo: () => void }) {
     <>
       <h2 className="mb-4 text-lg font-bold">Have you already calculated your daily expenditure (TDEE)?</h2>
       <div className="mt-2 flex items-center gap-3">
-        <MagnetButton onClick={onYes}>Yes, I know my TDEE</MagnetButton>
-        <MagnetButton variant="outline" onClick={onNo}>No, calculate it</MagnetButton>
+        <Button onClick={onYes}>Yes, I know my TDEE</Button>
+        <Button variant="outline" onClick={onNo}>No, calculate it</Button>
       </div>
     </>
   );
@@ -328,11 +391,11 @@ function StepTdeeInput({ imperial, onContinue }: { imperial: boolean; onContinue
         <NumberInput min={BOUNDS.tdee.min} max={BOUNDS.tdee.max} step={10} value={val} onChange={e => setVal(e.target.value)} />
         <ErrorText>{error}</ErrorText>
       </Field>
-      <Field label={`Bodyweight (${weightUnit}) — optional`} hint="Enables a macro estimate on your results.">
+      <Field label={`Bodyweight (${weightUnit}, optional)`} hint="Enables a macro estimate on your results.">
         <NumberInput min={weightBounds.min} max={weightBounds.max} value={weight} onChange={e => setWeight(e.target.value)} />
         <ErrorText>{weightError}</ErrorText>
       </Field>
-      <MagnetButton
+      <Button
         onClick={() => {
           const n = parseFloat(val);
           if (Number.isNaN(n) || n < BOUNDS.tdee.min || n > BOUNDS.tdee.max) {
@@ -351,7 +414,7 @@ function StepTdeeInput({ imperial, onContinue }: { imperial: boolean; onContinue
         }}
       >
         Continue
-      </MagnetButton>
+      </Button>
     </>
   );
 }
@@ -437,7 +500,7 @@ function StepBasics({
         <NumberInput min={BOUNDS.sessionsPerWeek.min} max={BOUNDS.sessionsPerWeek.max} value={cardio} onChange={e => setCardio(e.target.value)} />
         <ErrorText>{errors.cardio}</ErrorText>
       </Field>
-      <MagnetButton onClick={submit}>Continue</MagnetButton>
+      <Button onClick={submit}>Continue</Button>
     </>
   );
 }
@@ -454,8 +517,8 @@ function StepOptional({ onContinue }: { onContinue: (vals: OptionalValues) => vo
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Optional — refines your number</h2>
-      <p className="mb-4 text-xs text-hint-text">Skip any of these and we'll use standard defaults instead.</p>
+      <h2 className="mb-4 text-lg font-bold">A few optional details</h2>
+      <p className="mb-4 text-xs text-hint-text">Each one makes your number more accurate. Skip any you don't know and we'll use standard defaults.</p>
       <Field label="Average daily steps" hint="Refines your activity multiplier.">
         <NumberInput min={BOUNDS.steps.min} max={BOUNDS.steps.max} value={steps} onChange={e => setSteps(e.target.value)} />
         <ErrorText>{errors.steps}</ErrorText>
@@ -468,7 +531,7 @@ function StepOptional({ onContinue }: { onContinue: (vals: OptionalValues) => vo
         <NumberInput min={BOUNDS.bodyFatPct.min} max={BOUNDS.bodyFatPct.max} value={bf} onChange={e => setBf(e.target.value)} />
         <ErrorText>{errors.bf}</ErrorText>
       </Field>
-      <MagnetButton
+      <Button
         onClick={() => {
           const hasSteps = steps.trim() !== '';
           const hasBmr = bmr.trim() !== '';
@@ -496,7 +559,7 @@ function StepOptional({ onContinue }: { onContinue: (vals: OptionalValues) => vo
         }}
       >
         Continue
-      </MagnetButton>
+      </Button>
     </>
   );
 }
@@ -521,14 +584,14 @@ function StepGoal({ onContinue }: { onContinue: (goal: Goal) => void }) {
         ]}
       />
       <ErrorText>{error}</ErrorText>
-      <MagnetButton
+      <Button
         onClick={() => {
           if (!goal) { setError('Choose a goal to continue'); return; }
           onContinue(goal);
         }}
       >
         Continue
-      </MagnetButton>
+      </Button>
     </>
   );
 }
@@ -553,14 +616,14 @@ function StepPace({ onContinue }: { onContinue: (pace: Pace) => void }) {
         ]}
       />
       <ErrorText>{error}</ErrorText>
-      <MagnetButton
+      <Button
         onClick={() => {
           if (!pace) { setError('Choose a pace to continue'); return; }
           onContinue(pace);
         }}
       >
         Continue
-      </MagnetButton>
+      </Button>
     </>
   );
 }
@@ -575,14 +638,14 @@ function StepGoalEstimate({ imperial, onDone }: { imperial: boolean; onDone: (ta
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Target weight — optional</h2>
-      <p className="mb-4 text-xs text-hint-text">Get a rough timeline estimate. Skip if you'd rather not.</p>
+      <h2 className="mb-4 text-lg font-bold">Got a target weight?</h2>
+      <p className="mb-4 text-xs text-hint-text">We'll estimate roughly how long it could take. Optional.</p>
       <Field label={`Target weight (${weightUnit})`}>
         <NumberInput min={weightBounds.min} max={weightBounds.max} value={val} onChange={e => setVal(e.target.value)} />
         <ErrorText>{error}</ErrorText>
       </Field>
       <div className="mt-2 flex items-center gap-3">
-        <MagnetButton
+        <Button
           onClick={() => {
             const hasVal = val.trim() !== '';
             if (!hasVal) { onDone(null); return; }
@@ -596,31 +659,10 @@ function StepGoalEstimate({ imperial, onDone }: { imperial: boolean; onDone: (ta
           }}
         >
           Set my budget
-        </MagnetButton>
+        </Button>
         <SkipLink onClick={() => onDone(null)}>Skip</SkipLink>
       </div>
     </>
-  );
-}
-
-// ---- Step: loading ----
-
-const LOADING_TEXTS = ['Calculating your BMR...', 'Applying your activity multiplier...', 'Checking the safety floor...', 'Splitting your meals...'];
-const LOADING_DURATION_MS = 2400;
-
-function StepLoading({ onDone }: { onDone: () => void }) {
-  useEffect(() => {
-    const timeout = setTimeout(onDone, LOADING_DURATION_MS);
-    return () => clearTimeout(timeout);
-  }, [onDone]);
-
-  return (
-    <div className="relative -m-6 flex h-[220px] items-center justify-center overflow-hidden">
-      <BudgetLoadingPaths />
-      <div className="relative z-10">
-        <AITextLoading texts={LOADING_TEXTS} interval={800} className="text-2xl from-ink via-hint-text to-ink" />
-      </div>
-    </div>
   );
 }
 
@@ -792,7 +834,7 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
             <Block className="px-6 py-6" style={{ animationDelay: `${macrosDelay}ms` }}>
               <BudgetRings rings={macroRings} className="justify-center" />
               <p className="mt-4 text-xs text-hint-text">
-                Estimated from your bodyweight — protein at 1.8g/kg, fat at 25% of target, carbs filling the remainder. Not a prescribed plan.
+                Estimated from your bodyweight: protein at 1.8g/kg, fat at 25% of your target, carbs make up the rest. Not a prescribed plan.
               </p>
             </Block>
           </div>
@@ -810,22 +852,22 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
             At this pace, reaching your target weight is an estimated{' '}
             <span className="font-bold text-ink">{Math.round(weeks)} week{Math.round(weeks) === 1 ? '' : 's'}</span> away.
             <div className="mt-2 text-xs text-hint-text">
-              This is an estimate, not a guarantee — adherence, water weight, and metabolic adaptation will affect actual results.
+              This is an estimate, not a guarantee. Adherence, water weight and metabolic adaptation all affect real results.
             </div>
           </Block>
         )}
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <MagnetButton variant="outline" onClick={() => handleExport('image')} disabled={exportBusy !== null}>
+        <Button variant="outline" onClick={() => handleExport('image')} disabled={exportBusy !== null}>
           {exportBusy === 'image' ? 'Exporting...' : 'Download image'}
-        </MagnetButton>
-        <MagnetButton variant="outline" onClick={() => handleExport('pdf')} disabled={exportBusy !== null}>
+        </Button>
+        <Button variant="outline" onClick={() => handleExport('pdf')} disabled={exportBusy !== null}>
           {exportBusy === 'pdf' ? 'Exporting...' : 'Download PDF'}
-        </MagnetButton>
-        <MagnetButton variant="outline" onClick={() => setShowExportApps(true)}>
+        </Button>
+        <Button variant="outline" onClick={() => setShowExportApps(true)}>
           Export to app
-        </MagnetButton>
+        </Button>
       </div>
       <ErrorText>{exportError}</ErrorText>
 

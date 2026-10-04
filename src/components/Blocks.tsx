@@ -135,6 +135,27 @@ export function ToggleGroup<T extends string>({
   );
 }
 
+export function Button({
+  variant = 'solid',
+  className,
+  type = 'button',
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'solid' | 'outline' }) {
+  return (
+    <button
+      type={type}
+      className={cn(
+        'cursor-pointer rounded-lg border-2 border-ink px-5 py-3 text-[0.9375rem] font-bold transition-colors duration-150',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        'disabled:cursor-not-allowed disabled:border-disabled disabled:bg-disabled disabled:text-paper',
+        variant === 'solid' ? 'bg-ink text-paper hover:bg-ink-hover' : 'bg-paper text-ink hover:bg-hover-tint',
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
 export function SkipLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
     <button

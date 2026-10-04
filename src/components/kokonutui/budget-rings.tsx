@@ -44,13 +44,13 @@ function CircleProgress({ data, index }: CircleProgressProps) {
       transition={{ duration: 0.5, delay: index * 0.15, ease: 'easeOut' }}
     >
       <svg
-        aria-label={`${data.label} — ${Math.round(value)}%`}
+        aria-label={`${data.label}: ${Math.round(value)}%`}
         className="-rotate-90"
         height={data.size}
         viewBox={`0 0 ${data.size} ${data.size}`}
         width={data.size}
       >
-        <title>{`${data.label} — ${Math.round(value)}%`}</title>
+        <title>{`${data.label}: ${Math.round(value)}%`}</title>
         <circle cx={data.size / 2} cy={data.size / 2} fill="none" r={radius} stroke="var(--color-line)" strokeWidth={strokeWidth} />
         <motion.circle
           animate={{ strokeDashoffset: progress }}
