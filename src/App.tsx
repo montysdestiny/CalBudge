@@ -14,6 +14,7 @@ import {
 } from '@/components/Blocks';
 import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
+import HomeContent from '@/components/HomeContent';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
 import { EXTERNAL_APPS, copyTargetsForApp } from '@/lib/appExport';
@@ -129,6 +130,13 @@ export default function App() {
             <LogoMark />
             <span className="text-lg font-bold tracking-tight">CalBudge</span>
           </button>
+          {stepId === 'welcome' && (
+            <nav aria-label="Page sections" className="hidden items-center gap-6 text-sm font-medium text-muted-text sm:flex">
+              <a href="#how-it-works" className="hover:text-ink">How it works</a>
+              <a href="#the-maths" className="hover:text-ink">The maths</a>
+              <a href="#faq" className="hover:text-ink">FAQ</a>
+            </nav>
+          )}
           <UnitSwitch
             imperial={imperial}
             onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
@@ -270,8 +278,14 @@ export default function App() {
         </div>
       </main>
 
-      <footer className="border-t border-line bg-paper px-6 py-4 text-center text-xs text-hint-text">
-        Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before changing your diet.
+      <footer className="border-t border-line bg-paper">
+        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-6 text-xs text-hint-text sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-medium text-muted-text">© {new Date().getFullYear()} CalBudge · Free calorie budget calculator</span>
+          <span>
+            Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
+            changing your diet.
+          </span>
+        </div>
       </footer>
     </div>
   );
@@ -356,6 +370,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
           </li>
         ))}
       </ul>
+      <HomeContent onStart={onStart} />
     </section>
   );
 }
