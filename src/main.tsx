@@ -3,6 +3,9 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.tsx'
+import { loadGoogleAnalytics, readConsent } from './lib/consent'
+
+if (readConsent() === 'granted') loadGoogleAnalytics()
 
 const container = document.getElementById('root')!
 const app = (

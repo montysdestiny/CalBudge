@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Block,
   Button,
@@ -14,6 +14,7 @@ import {
 } from '@/components/Blocks';
 import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
+import CookieBanner from '@/components/CookieBanner';
 import HomeContent from '@/components/HomeContent';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
@@ -33,6 +34,7 @@ import {
   lbToKg,
   redistributeMealSplit,
 } from '@/lib/calc';
+import { readConsent } from '@/lib/consent';
 import { exportNodeAsImage, exportNodeAsPdf } from '@/lib/export';
 
 type StepId =
@@ -77,6 +79,12 @@ export default function App() {
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
   const [stepId, setStepId] = useState<StepId>('welcome');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  // Opened after mount (not during render) so the prerendered HTML and the
+  // first client render match.
+  const [cookieBannerOpen, setCookieBannerOpen] = useState(false);
+  useEffect(() => {
+    if (readConsent() === null) setCookieBannerOpen(true);
+  }, []);
   // Extra display-only fields (original raw input units, kept separate from
   // the SI values used in calc.ts) — mirrors the vanilla version's
   // heightDisplay/weightDisplay so re-opening "basics" shows the unit the
@@ -283,10 +291,18 @@ export default function App() {
           <span className="font-medium text-muted-text">© {new Date().getFullYear()} CalBudge · Free calorie budget calculator</span>
           <span>
             Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
-            changing your diet.
+            changing your diet.{' '}
+            <button
+              type="button"
+              onClick={() => setCookieBannerOpen(true)}
+              className="cursor-pointer border-none bg-transparent p-0 text-xs text-hint-text underline hover:text-ink"
+            >
+              Cookie settings
+            </button>
           </span>
         </div>
       </footer>
+      {cookieBannerOpen && <CookieBanner onClose={() => setCookieBannerOpen(false)} />}
     </div>
   );
 }
