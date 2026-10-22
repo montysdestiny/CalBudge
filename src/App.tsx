@@ -36,7 +36,6 @@ import {
   redistributeMealSplit,
 } from '@/lib/calc';
 import { readConsent } from '@/lib/consent';
-import { exportNodeAsImage, exportNodeAsPdf } from '@/lib/export';
 import type { LandingPage } from '@/lib/pages';
 
 type StepId =
@@ -748,6 +747,9 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
     setExportError('');
     setExportBusy(kind);
     try {
+      // Loaded on demand: jsPDF + html-to-image are a large share of the
+      // bundle and most visitors never export.
+      const { exportNodeAsImage, exportNodeAsPdf } = await import('@/lib/export');
       if (kind === 'image') await exportNodeAsImage(exportRef.current, 'calbudge-budget.png');
       else await exportNodeAsPdf(exportRef.current, 'calbudge-budget.pdf');
     } catch {
