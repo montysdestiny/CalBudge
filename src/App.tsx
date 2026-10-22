@@ -37,6 +37,7 @@ import {
 } from '@/lib/calc';
 import { readConsent } from '@/lib/consent';
 import type { LandingPage } from '@/lib/pages';
+import { decodePlan, encodePlan } from '@/lib/share';
 
 type StepId =
   | 'welcome'
@@ -86,6 +87,16 @@ export default function App({ page }: { page: LandingPage }) {
   useEffect(() => {
     if (readConsent() === null) setCookieBannerOpen(true);
   }, []);
+  // A shared plan link (#plan=...) opens straight to that plan's results.
+  // Applied after mount for the same hydration reason as above.
+  const [sharedView, setSharedView] = useState(false);
+  useEffect(() => {
+    const plan = decodePlan(window.location.hash);
+    if (!plan) return;
+    setState(plan);
+    setSharedView(true);
+    setStepId('result');
+  }, []);
   // Extra display-only fields (original raw input units, kept separate from
   // the SI values used in calc.ts) — mirrors the vanilla version's
   // heightDisplay/weightDisplay so re-opening "basics" shows the unit the
@@ -114,6 +125,10 @@ export default function App({ page }: { page: LandingPage }) {
   }
 
   function restart() {
+    if (sharedView) {
+      window.history.replaceState(null, '', window.location.pathname);
+      setSharedView(false);
+    }
     setState(INITIAL_STATE);
     setHistory([]);
     setHeightDisplay(null);
@@ -281,7 +296,7 @@ export default function App({ page }: { page: LandingPage }) {
           )}
 
 
-          {stepId === 'result' && <StepResult state={state} historyLength={history.length} onRestart={restart} />}
+          {stepId === 'result' && <StepResult state={state} historyLength={history.length} shared={sharedView} onRestart={restart} />}
               </Block>
             </>
           )}
@@ -712,7 +727,27 @@ function StepGoalEstimate({ imperial, onDone }: { imperial: boolean; onDone: (ta
 
 const MAIN_MEAL_NAMES = ['Breakfast', 'Lunch', 'Dinner'];
 
-function StepResult({ state, historyLength, onRestart }: { state: WizardState; historyLength: number; onRestart: () => void }) {
+function StepResult({
+  state,
+  historyLength,
+  shared,
+  onRestart,
+}: {
+  state: WizardState;
+  historyLength: number;
+  shared: boolean;
+  onRestart: () => void;
+}) {
+  const [linkStatus, setLinkStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
+  async function copyPlanLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + window.location.pathname + encodePlan(state));
+      setLinkStatus('copied');
+    } catch {
+      setLinkStatus('failed');
+    }
+  }
+
   const { target, cappedLow, cappedHigh, adjPct } = useMemo(() => computeTarget(state), [state]);
   const X = Math.round(target);
   const rows = useMemo(() => computeMealSplit(X), [X]);
@@ -837,6 +872,14 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
 
   return (
     <>
+      {shared && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line px-4 py-3 text-sm text-muted-text">
+          <span>You're viewing a plan someone shared with you.</span>
+          <Button className="py-1.5 text-sm" onClick={onRestart}>
+            Calculate your own
+          </Button>
+        </div>
+      )}
       <div ref={exportRef}>
         {(cappedLow || cappedHigh) && (
           <Block className="mb-4 border-accent px-4 py-3.5 text-[0.875rem] font-medium" style={{ animationDelay: `${noticeDelay}ms` }}>
@@ -924,8 +967,12 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
         <Button variant="outline" onClick={() => setShowExportApps(true)}>
           Export to app
         </Button>
+        <Button variant="outline" onClick={copyPlanLink}>
+          {linkStatus === 'copied' ? 'Link copied' : 'Copy link to my plan'}
+        </Button>
       </div>
       <ErrorText>{exportError}</ErrorText>
+      <ErrorText>{linkStatus === 'failed' ? "Couldn't copy the link. Try again." : ''}</ErrorText>
 
       <div className="mt-6">
         <SkipLink onClick={onRestart}>Start over</SkipLink>

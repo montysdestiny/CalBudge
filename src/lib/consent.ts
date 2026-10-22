@@ -51,7 +51,11 @@ export function loadGoogleAnalytics() {
     ad_personalization: 'denied',
   });
   window.gtag('js', new Date());
-  window.gtag('config', GA_ID);
+  // Drop the URL hash: shared plan links carry the user's inputs there
+  // (lib/share.ts) and they must not end up in analytics.
+  window.gtag('config', GA_ID, {
+    page_location: window.location.origin + window.location.pathname + window.location.search,
+  });
 
   const script = document.createElement('script');
   script.async = true;

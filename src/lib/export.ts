@@ -27,27 +27,51 @@ function flattenFlipCards(node: HTMLElement) {
   };
 }
 
+// Export-only footer crediting the site, so shared images/PDFs lead back
+// to it. Added for the capture and removed straight after.
+function addCreditFooter(node: HTMLElement) {
+  const footer = document.createElement('div');
+  footer.textContent = 'Made with CalBudge · cal-budge.vercel.app';
+  Object.assign(footer.style, {
+    marginTop: '16px',
+    paddingTop: '12px',
+    paddingBottom: '16px',
+    borderTop: '1px solid var(--color-line)',
+    textAlign: 'center',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: 'var(--color-muted-text)',
+  });
+  node.appendChild(footer);
+  return () => footer.remove();
+}
+
 // Renders at 2x for a crisp export regardless of the viewer's own zoom.
+// Size is measured while the footer is attached so the PDF keeps the
+// image's real aspect ratio.
 async function captureNode(node: HTMLElement) {
-  const restore = flattenFlipCards(node);
+  const restoreCards = flattenFlipCards(node);
+  const removeFooter = addCreditFooter(node);
   try {
-    return await toPng(node, {
+    const { width, height } = node.getBoundingClientRect();
+    const dataUrl = await toPng(node, {
       pixelRatio: 2,
       backgroundColor: getComputedStyle(document.body).backgroundColor,
     });
+    return { dataUrl, width, height };
   } finally {
-    restore();
+    removeFooter();
+    restoreCards();
   }
 }
 
 export async function exportNodeAsImage(node: HTMLElement, filename: string) {
-  const dataUrl = await captureNode(node);
+  const { dataUrl } = await captureNode(node);
   triggerDownload(dataUrl, filename);
 }
 
 export async function exportNodeAsPdf(node: HTMLElement, filename: string) {
-  const dataUrl = await captureNode(node);
-  const { width, height } = node.getBoundingClientRect();
+  const { dataUrl, width, height } = await captureNode(node);
 
   // Portrait A4 at 2x-equivalent point scale, image centered and scaled
   // to fit the page with a small margin — the ledger content is usually
