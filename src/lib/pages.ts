@@ -14,6 +14,9 @@ export interface LandingPage {
   linkLabel: string;
   /** <title> and social title. */
   title: string;
+  /** Headline and subline for the social preview image (scripts/og-images.mjs). */
+  ogTitle: string;
+  ogSubtitle: string;
   /** Meta description, ~150 characters. */
   description: string;
   h1: string;
@@ -28,6 +31,8 @@ export interface LandingPage {
 export const PAGES: LandingPage[] = [
   {
     path: '/',
+    ogTitle: 'Your daily calorie budget, split meal by meal.',
+    ogSubtitle: 'BMR, TDEE and macros in about a minute',
     linkLabel: 'Calorie budget calculator',
     title: 'CalBudge | Daily Calorie Budget Calculator',
     description:
@@ -40,6 +45,8 @@ export const PAGES: LandingPage[] = [
   },
   {
     path: '/tdee-calculator',
+    ogTitle: 'TDEE Calculator',
+    ogSubtitle: 'Find your maintenance calories',
     linkLabel: 'TDEE calculator',
     title: 'TDEE Calculator: Find Your Maintenance Calories | CalBudge',
     description:
@@ -67,6 +74,8 @@ export const PAGES: LandingPage[] = [
   },
   {
     path: '/bmr-calculator',
+    ogTitle: 'BMR Calculator',
+    ogSubtitle: 'Mifflin-St Jeor and Katch-McArdle',
     linkLabel: 'BMR calculator',
     title: 'BMR Calculator: Mifflin-St Jeor & Katch-McArdle | CalBudge',
     description:
@@ -94,6 +103,8 @@ export const PAGES: LandingPage[] = [
   },
   {
     path: '/calorie-deficit-calculator',
+    ogTitle: 'Calorie Deficit Calculator',
+    ogSubtitle: 'How much to eat to lose weight',
     linkLabel: 'Calorie deficit calculator',
     title: 'Calorie Deficit Calculator: How Much to Eat to Lose Weight | CalBudge',
     description:
@@ -122,6 +133,8 @@ export const PAGES: LandingPage[] = [
   },
   {
     path: '/bulking-calculator',
+    ogTitle: 'Bulking Calculator',
+    ogSubtitle: 'Calories and macros for a lean bulk',
     linkLabel: 'Bulking calculator',
     title: 'Bulking Calculator: Calories for a Lean Bulk | CalBudge',
     description:
@@ -149,6 +162,8 @@ export const PAGES: LandingPage[] = [
   },
   {
     path: '/macro-calculator',
+    ogTitle: 'Macro Calculator',
+    ogSubtitle: 'Protein, carbs and fat for your goal',
     linkLabel: 'Macro calculator',
     title: 'Macro Calculator: Protein, Carbs & Fat | CalBudge',
     description:

@@ -1,6 +1,6 @@
 // Runs after the client and SSR builds. For every landing page in
 // src/lib/pages.ts: server-render the app, fill in that page's
-// title/description/canonical/social tags, and write it to
+// title/description/canonical/social tags and breadcrumbs, and write it to
 // dist/<path>.html. Also generates dist/sitemap.xml.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -48,6 +48,25 @@ for (const page of PAGES) {
   html = setTag(html, /(<meta name="twitter:description" content=")[^"]*(")/, description)
   html = setTag(html, /("url": )"[^"]*"(,)/, JSON.stringify(url))
   html = setTag(html, /("description": )"[^"]*"(,)/, JSON.stringify(page.description))
+  // Images come from scripts/og-images.mjs (run locally, committed to public/og/).
+  const image = `${SITE_URL}/og/${page.path === '/' ? 'home' : page.path.slice(1)}.png`
+  if (!fs.existsSync(path.join(root, 'public', new URL(image).pathname))) {
+    throw new Error(`prerender: missing ${new URL(image).pathname}; run node scripts/og-images.mjs`)
+  }
+  html = setTag(html, /(<meta property="og:image" content=")[^"]*(")/, image)
+  html = setTag(html, /(<meta name="twitter:image" content=")[^"]*(")/, image)
+  if (page.path !== '/') {
+    const breadcrumbs = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'CalBudge', item: `${SITE_URL}/` },
+        { '@type': 'ListItem', position: 2, name: page.linkLabel, item: url },
+      ],
+    }
+    html = html.replace('</head>', `  <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>
+  </head>`)
+  }
   html = html.replace(marker, `<div id="root">${render(page.path)}</div>`)
 
   // dist/tdee-calculator.html is served at /tdee-calculator via a rewrite in vercel.json.
