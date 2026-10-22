@@ -12,7 +12,7 @@
   --color-paper: #F4F6F9;
   --color-deficit: #8C3A3A;
   --color-muted-text: #5B6472;
-  --color-hint-text: #8891A3;
+  --color-hint-text: #687183; /* 4.5:1 on paper (WCAG AA) */
   --color-onink-text: #B9C2D1;
   --color-hover-tint: #E4E8F0;
   --color-ink-hover: #344466;
