@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/tdee-calculator", "destination": "/tdee-calculator.html" },
+    { "source": "/bmr-calculator", "destination": "/bmr-calculator.html" },
+    { "source": "/calorie-deficit-calculator", "destination": "/calorie-deficit-calculator.html" },
+    { "source": "/bulking-calculator", "destination": "/bulking-calculator.html" },
+    { "source": "/macro-calculator", "destination": "/macro-calculator.html" }
+  ]
+}

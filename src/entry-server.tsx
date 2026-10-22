@@ -1,13 +1,16 @@
 import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App.tsx'
+import { PAGES, SITE_URL, findPage } from './lib/pages'
 
-// Used at build time only (scripts/prerender.mjs) to bake the homepage's
-// HTML into dist/index.html, so crawlers that don't run JS still see content.
-export function render() {
+export { PAGES, SITE_URL }
+
+// Used at build time only (scripts/prerender.mjs) to bake each landing
+// page's HTML into dist/, so crawlers that don't run JS still see content.
+export function render(pathname: string) {
   return renderToString(
     <StrictMode>
-      <App />
+      <App page={findPage(pathname)} />
     </StrictMode>,
   )
 }

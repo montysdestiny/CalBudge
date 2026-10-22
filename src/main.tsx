@@ -4,13 +4,14 @@ import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.tsx'
 import { loadGoogleAnalytics, readConsent } from './lib/consent'
+import { findPage } from './lib/pages'
 
 if (readConsent() === 'granted') loadGoogleAnalytics()
 
 const container = document.getElementById('root')!
 const app = (
   <StrictMode>
-    <App />
+    <App page={findPage(window.location.pathname)} />
     <Analytics />
   </StrictMode>
 )

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button } from '@/components/Blocks';
+import { PAGES } from '@/lib/pages';
 
 // Long-form homepage content below the hero. It's prerendered into
 // index.html at build time, so it's what search engines index. Every
@@ -73,7 +74,16 @@ const FAQS = [
   },
 ];
 
-export default function HomeContent({ onStart }: { onStart: () => void }) {
+export default function HomeContent({
+  currentPath,
+  cta,
+  onStart,
+}: {
+  currentPath: string;
+  cta: string;
+  onStart: () => void;
+}) {
+  const otherPages = PAGES.filter(p => p.path !== currentPath);
   return (
     <div className="mt-20 space-y-20">
       <section aria-labelledby="how-it-works">
@@ -190,9 +200,24 @@ export default function HomeContent({ onStart }: { onStart: () => void }) {
         <h2 className="text-2xl font-bold tracking-tight text-ink">Ready to find your number?</h2>
         <Prose>It takes about a minute. Free, no signup.</Prose>
         <Button className="mt-6" onClick={onStart}>
-          Calculate my budget
+          {cta}
         </Button>
       </section>
+
+      <nav aria-labelledby="more-calculators">
+        <h2 id="more-calculators" className="text-sm font-bold tracking-wide text-hint-text uppercase">
+          More calculators
+        </h2>
+        <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-[0.9375rem]">
+          {otherPages.map(p => (
+            <li key={p.path}>
+              <a href={p.path} className="font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
+                {p.linkLabel}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 }

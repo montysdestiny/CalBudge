@@ -28,6 +28,7 @@ import {
   computeGoalEstimateWeeks,
   computeMacroSplit,
   computeMealSplit,
+  computeBMR,
   computeTDEE,
   computeTarget,
   inToCm,
@@ -36,6 +37,7 @@ import {
 } from '@/lib/calc';
 import { readConsent } from '@/lib/consent';
 import { exportNodeAsImage, exportNodeAsPdf } from '@/lib/export';
+import type { LandingPage } from '@/lib/pages';
 
 type StepId =
   | 'welcome'
@@ -75,7 +77,7 @@ const INITIAL_STATE: WizardState = {
   tdee: null,
 };
 
-export default function App() {
+export default function App({ page }: { page: LandingPage }) {
   const [state, setState] = useState<WizardState>(INITIAL_STATE);
   const [stepId, setStepId] = useState<StepId>('welcome');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -155,7 +157,7 @@ export default function App() {
       <main className="flex flex-1 items-center justify-center px-6 py-10">
         <div className={`w-full ${stepId === 'welcome' ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
           {stepId === 'welcome' ? (
-            <Welcome onStart={() => goTo('entry')} />
+            <Welcome page={page} onStart={() => goTo('entry')} />
           ) : (
             <>
               {history.map((h, idx) => (
@@ -239,6 +241,7 @@ export default function App() {
 
           {stepId === 'goal' && (
             <StepGoal
+              preset={page.presetGoal}
               onContinue={goal => {
                 setState(s => {
                   const next = { ...s, goal, pace: goal === 'maintain' ? null : s.pace };
@@ -365,18 +368,13 @@ const FEATURES = [
   { title: 'Macro estimate', body: 'Protein, carbs and fat based on your bodyweight.' },
 ];
 
-function Welcome({ onStart }: { onStart: () => void }) {
+function Welcome({ page, onStart }: { page: LandingPage; onStart: () => void }) {
   return (
     <section className="animate-block-in">
-      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-        Your daily calorie budget, split meal by meal.
-      </h1>
-      <p className="mt-4 text-lg text-muted-text">
-        Answer a few questions about your body and training. Get a daily calorie target you can actually plan around.
-        Takes about a minute, no signup.
-      </p>
+      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">{page.h1}</h1>
+      <p className="mt-4 text-lg text-muted-text">{page.intro}</p>
       <Button className="mt-8" onClick={onStart}>
-        Calculate my budget
+        {page.cta}
       </Button>
       <ul className="mt-12 grid gap-6 border-t border-line pt-6 sm:grid-cols-3">
         {FEATURES.map(f => (
@@ -386,7 +384,21 @@ function Welcome({ onStart }: { onStart: () => void }) {
           </li>
         ))}
       </ul>
-      <HomeContent onStart={onStart} />
+      {page.sections.length > 0 && (
+        <div className="mt-20 space-y-10">
+          {page.sections.map(sec => (
+            <section key={sec.heading}>
+              <h2 className="text-2xl font-bold tracking-tight text-ink">{sec.heading}</h2>
+              {sec.paragraphs.map(para => (
+                <p key={para.slice(0, 40)} className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">
+                  {para}
+                </p>
+              ))}
+            </section>
+          ))}
+        </div>
+      )}
+      <HomeContent currentPath={page.path} cta={page.cta} onStart={onStart} />
     </section>
   );
 }
@@ -597,8 +609,8 @@ function StepOptional({ onContinue }: { onContinue: (vals: OptionalValues) => vo
 
 // ---- Step: goal ----
 
-function StepGoal({ onContinue }: { onContinue: (goal: Goal) => void }) {
-  const [goal, setGoal] = useState<Goal | null>(null);
+function StepGoal({ preset, onContinue }: { preset?: Goal; onContinue: (goal: Goal) => void }) {
+  const [goal, setGoal] = useState<Goal | null>(preset ?? null);
   const [error, setError] = useState('');
 
   return (
@@ -757,6 +769,7 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
   const odometerValue = useOdometer(X, totalDelay + ENTRANCE_DURATION_MS);
 
   const tdeeRounded = Math.round(state.tdee ?? X);
+  const bmrRounded = state.knowsTDEE ? null : Math.round(computeBMR(state));
   const mainMealsKcal = redistributedRows.filter(r => MAIN_MEAL_NAMES.includes(r.name)).reduce((sum, r) => sum + r.kcal, 0);
   const extrasKcal = redistributedRows.filter(r => !MAIN_MEAL_NAMES.includes(r.name)).reduce((sum, r) => sum + r.kcal, 0);
   const rings = useMemo(
@@ -840,6 +853,16 @@ function StepResult({ state, historyLength, onRestart }: { state: WizardState; h
             <span className="text-[2.75rem] font-bold tabular-nums">{odometerValue.toLocaleString()}</span>
             <span className="text-sm font-medium text-onink-text">kcal target</span>
           </Block>
+          <div className="mb-2 flex flex-wrap justify-between gap-x-4 px-1 text-sm text-muted-text tabular-nums">
+            <span>
+              Maintenance (TDEE): <span className="font-bold text-ink">{tdeeRounded.toLocaleString()} kcal</span>
+            </span>
+            {bmrRounded != null && (
+              <span>
+                BMR: <span className="font-bold text-ink">{bmrRounded.toLocaleString()} kcal</span>
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {rows.map((r, i) => {
               const isExcluded = excludedMeals.has(r.name);
