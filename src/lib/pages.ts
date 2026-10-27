@@ -22,6 +22,8 @@ export interface LandingPage {
   h1: string;
   intro: string;
   cta: string;
+  /** 'bulk' renders the coaches' CSV tool instead of the single-person calculator. */
+  kind?: 'calculator' | 'bulk';
   /** Goal pre-selected on the goal step when started from this page. */
   presetGoal?: Goal;
   /** Page-specific explainer shown above the shared "how it works" content. */
@@ -184,6 +186,35 @@ export const PAGES: LandingPage[] = [
         heading: 'Use your macros in your tracker',
         paragraphs: [
           'On the results screen, choose "Export to app" to copy your calorie and macro targets in a format ready to paste into MyFitnessPal, MacroFactor or Cal AI. You can also download them as an image or PDF.',
+        ],
+      },
+    ],
+  },
+  {
+    path: '/coaches',
+    kind: 'bulk',
+    ogTitle: 'Bulk Macro Calculator for Coaches',
+    ogSubtitle: 'Upload your clients, get a report for each',
+    linkLabel: 'Bulk calculator for coaches',
+    title: 'Bulk Macro Calculator for Coaches: Client Reports from a CSV | CalBudge',
+    description:
+      'Free bulk calorie and macro calculator for coaches. Upload a CSV of clients and download a PDF report with targets, macros and meal splits for each.',
+    h1: 'Bulk macro calculator for coaches',
+    intro:
+      'Upload a spreadsheet of your clients and get calorie targets, macro splits and meal plans for all of them at once. Download a PDF report with a page per client, or a spreadsheet of results.',
+    cta: 'Upload client file',
+    sections: [
+      {
+        heading: 'What the report includes',
+        paragraphs: [
+          'The PDF starts with a summary page listing every client with their goal, calorie target and macros. Each client then gets their own page with their daily target, maintenance calories (TDEE), BMR, a macro table with grams and calories, a meal-by-meal split and, if you included a target weight, an estimated timeline.',
+          'Every client is calculated with exactly the same formulas and safety limits as the single-person calculator: Mifflin-St Jeor or Katch-McArdle for BMR, an activity factor from training and steps, and a target that never drops below 1.2 times BMR or 1,200 calories.',
+        ],
+      },
+      {
+        heading: 'Private by design',
+        paragraphs: [
+          'Your file is read and calculated entirely in your browser. Client names, measurements and results are never uploaded to a server, so you can use it with real client data.',
         ],
       },
     ],

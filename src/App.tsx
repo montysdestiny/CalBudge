@@ -14,6 +14,7 @@ import {
 } from '@/components/Blocks';
 import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
+import BulkEstimator from '@/components/BulkEstimator';
 import CookieBanner from '@/components/CookieBanner';
 import HomeContent from '@/components/HomeContent';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
@@ -105,6 +106,7 @@ export default function App({ page }: { page: LandingPage }) {
   const [weightDisplay, setWeightDisplay] = useState<number | null>(null);
 
   const imperial = state.unitSystem === 'imperial';
+  const isBulk = page.kind === 'bulk';
 
   function pushSummary(label: string, value: string, editStepId: StepId) {
     setHistory(h => [...h.filter(e => !(e.editStepId === editStepId && e.label === label)), { label, value, editStepId }]);
@@ -145,6 +147,10 @@ export default function App({ page }: { page: LandingPage }) {
           <button
             type="button"
             onClick={() => {
+              if (isBulk) {
+                window.location.href = '/';
+                return;
+              }
               restart();
               goTo('welcome');
             }}
@@ -156,21 +162,33 @@ export default function App({ page }: { page: LandingPage }) {
           </button>
           {stepId === 'welcome' && (
             <nav aria-label="Page sections" className="hidden items-center gap-6 text-sm font-medium text-muted-text sm:flex">
-              <a href="#how-it-works" className="hover:text-ink">How it works</a>
-              <a href="#the-maths" className="hover:text-ink">The maths</a>
-              <a href="#faq" className="hover:text-ink">FAQ</a>
+              {isBulk ? (
+                <a href="/" className="hover:text-ink">Single calculator</a>
+              ) : (
+                <>
+                  <a href="#how-it-works" className="hover:text-ink">How it works</a>
+                  <a href="#the-maths" className="hover:text-ink">The maths</a>
+                  <a href="#faq" className="hover:text-ink">FAQ</a>
+                  <a href="/coaches" className="hover:text-ink">For coaches</a>
+                </>
+              )}
             </nav>
           )}
-          <UnitSwitch
-            imperial={imperial}
-            onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
-          />
+          {/* On the coaches page, units come from the CSV's column names. */}
+          {!isBulk && (
+            <UnitSwitch
+              imperial={imperial}
+              onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
+            />
+          )}
         </div>
       </header>
 
       <main className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className={`w-full ${stepId === 'welcome' ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
-          {stepId === 'welcome' ? (
+        <div className={`w-full ${isBulk ? 'max-w-3xl' : stepId === 'welcome' ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
+          {isBulk ? (
+            <BulkEstimator page={page} />
+          ) : stepId === 'welcome' ? (
             <Welcome page={page} onStart={() => goTo('entry')} />
           ) : (
             <>
