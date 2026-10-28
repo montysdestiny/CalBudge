@@ -1,10 +1,27 @@
 import { useRef, useState } from 'react';
 import { Button, ErrorText } from '@/components/Blocks';
-import { type ClientResult, type RowError, MAX_ROWS, TEMPLATE_CSV, goalLabel, processCsv, resultsToCsv } from '@/lib/bulk';
+import {
+  type ClientResult,
+  type RowError,
+  type Separator,
+  MAX_FILE_BYTES,
+  MAX_ROWS,
+  TEMPLATE_CSV,
+  decodeFileBytes,
+  goalLabel,
+  nameSupport,
+  processCsv,
+  resultsToCsv,
+} from '@/lib/bulk';
 import type { LandingPage } from '@/lib/pages';
 
-function downloadText(text: string, filename: string, type: string) {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+// The BOM makes Excel open UTF-8 CSVs with accented names intact.
+function downloadCsv(text: string, filename: string) {
+  downloadBlob(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' }), filename);
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
@@ -13,6 +30,8 @@ function downloadText(text: string, filename: string, type: string) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+const ERRORS_SHOWN = 50;
 
 const COLUMNS: { name: string; required: string; notes: string }[] = [
   { name: 'name', required: 'Yes', notes: 'Client name or ID. Shown on the report.' },
@@ -37,33 +56,79 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
   const [results, setResults] = useState<ClientResult[]>([]);
   const [errors, setErrors] = useState<RowError[]>([]);
   const [fatal, setFatal] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [separator, setSeparator] = useState<Separator>(',');
   const [dragging, setDragging] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState('');
 
+  function showFatal(message: string) {
+    setResults([]);
+    setErrors([]);
+    setWarnings([]);
+    setFatal(message);
+  }
+
   async function handleFile(file: File) {
     setFileName(file.name);
     setPdfError('');
-    if (file.size > 5_000_000) {
-      setResults([]);
-      setErrors([]);
-      setFatal('That file is over 5 MB. Export it as CSV, or split it into smaller files.');
+    // Clear the input so choosing the same (fixed) file again still triggers a change.
+    if (fileInput.current) fileInput.current.value = '';
+    if (file.size > MAX_FILE_BYTES) {
+      showFatal('That file is over 5 MB. Split it into smaller files.');
       return;
     }
-    const out = processCsv(await file.text());
+    let bytes: Uint8Array;
+    try {
+      bytes = new Uint8Array(await file.arrayBuffer());
+    } catch {
+      showFatal("Couldn't read that file. Try saving it again as CSV.");
+      return;
+    }
+    const decoded = decodeFileBytes(bytes);
+    if ('error' in decoded) {
+      showFatal(decoded.error);
+      return;
+    }
+    // Binary content (control characters) means this isn't a text/CSV file.
+    // eslint-disable-next-line no-control-regex
+    if (!/\.(csv|txt|tsv)$/i.test(file.name) && /[\u0000-\u0008\u000e-\u001f]/.test(decoded.text.slice(0, 2000))) {
+      showFatal("That doesn't look like a CSV file. Save your spreadsheet as CSV and upload that.");
+      return;
+    }
+    const out = processCsv(decoded.text);
     setResults(out.results);
     setErrors(out.errors);
+    setWarnings(out.warnings);
+    setSeparator(out.separator);
     setFatal(out.fatal);
   }
+
+  const dateStamp = () => new Date().toISOString().slice(0, 10);
+  const unprintableNames = results.filter(r => nameSupport(r.name) === 'unsupported');
 
   async function downloadPdf() {
     setPdfBusy(true);
     setPdfError('');
     try {
       const { generateBulkReport } = await import('@/lib/bulkReport');
-      generateBulkReport(results, 'calbudge-client-report.pdf');
+      // Names outside Western European letters need the embedded font.
+      let fonts;
+      if (results.some(r => nameSupport(r.name) === 'needs-font')) {
+        const load = async (file: string) => {
+          const res = await fetch(`/fonts/${file}`);
+          if (!res.ok) throw new Error(`font ${file}: HTTP ${res.status}`);
+          const buf = new Uint8Array(await res.arrayBuffer());
+          let binary = '';
+          for (let i = 0; i < buf.length; i += 0x8000) binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+          return btoa(binary);
+        };
+        const [regular, bold] = await Promise.all([load('NotoSans-Regular.ttf'), load('NotoSans-Bold.ttf')]);
+        fonts = { regular, bold };
+      }
+      generateBulkReport(results, `calbudge-client-report-${dateStamp()}.pdf`, fonts);
     } catch {
-      setPdfError('Could not generate the PDF. Try again.');
+      setPdfError("Couldn't generate the PDF. Check your connection and try again.");
     } finally {
       setPdfBusy(false);
     }
@@ -73,6 +138,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
     setFileName(null);
     setResults([]);
     setErrors([]);
+    setWarnings([]);
     setFatal(null);
     if (fileInput.current) fileInput.current.value = '';
   }
@@ -97,7 +163,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
           <Button
             variant="outline"
             className="mt-3 py-2 text-sm"
-            onClick={() => downloadText(TEMPLATE_CSV, 'calbudge-clients-template.csv', 'text/csv')}
+            onClick={() => downloadCsv(TEMPLATE_CSV, 'calbudge-clients-template.csv')}
           >
             Download template (CSV)
           </Button>
@@ -119,16 +185,19 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
               if (file) void handleFile(file);
             }}
             className={
-              'mt-3 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors ' +
+              'mt-3 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent ' +
               (dragging ? 'border-ink bg-hover-tint' : 'border-line hover:border-ink')
             }
           >
-            <span className="font-bold text-ink">{fileName ?? 'Drop a CSV file here, or click to choose'}</span>
-            <span className="mt-1 text-sm text-muted-text">Up to {MAX_ROWS.toLocaleString()} clients per file</span>
+            {/* pointer-events-none stops dragleave firing when the cursor crosses the text. */}
+            <span className="pointer-events-none font-bold text-ink">{fileName ?? 'Drop a CSV file here, or click to choose'}</span>
+            <span className="pointer-events-none mt-1 text-sm text-muted-text">
+              {fileName ? 'Drop or click to choose another file' : `Up to ${MAX_ROWS.toLocaleString()} clients per file`}
+            </span>
             <input
               ref={fileInput}
               type="file"
-              accept=".csv,text/csv"
+              accept=".csv,.tsv,.txt,text/csv"
               className="sr-only"
               onChange={e => {
                 const file = e.target.files?.[0];
@@ -152,9 +221,15 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
             </p>
           )}
 
+          {warnings.map(w => (
+            <p key={w} className="mt-3 text-sm text-muted-text">
+              {w}
+            </p>
+          ))}
+
           {errors.length > 0 && (
             <ul className="mt-4 space-y-2 rounded-lg border border-deficit/40 px-4 py-3 text-sm">
-              {errors.map(e => (
+              {errors.slice(0, ERRORS_SHOWN).map(e => (
                 <li key={e.row}>
                   <span className="font-bold text-deficit">
                     Row {e.row} ({e.name}):
@@ -162,6 +237,11 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
                   <span className="text-muted-text">{e.problems.join('; ')}</span>
                 </li>
               ))}
+              {errors.length > ERRORS_SHOWN && (
+                <li className="font-medium text-muted-text">
+                  ...and {errors.length - ERRORS_SHOWN} more. Fix these first, then upload the file again.
+                </li>
+              )}
             </ul>
           )}
 
@@ -171,7 +251,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
                 <Button onClick={downloadPdf} disabled={pdfBusy}>
                   {pdfBusy ? 'Generating...' : 'Download PDF report'}
                 </Button>
-                <Button variant="outline" onClick={() => downloadText(resultsToCsv(results), 'calbudge-client-results.csv', 'text/csv')}>
+                <Button variant="outline" onClick={() => downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`)}>
                   Download results (CSV)
                 </Button>
                 <Button variant="outline" onClick={reset}>
@@ -179,6 +259,13 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
                 </Button>
               </div>
               <ErrorText>{pdfError}</ErrorText>
+              {unprintableNames.length > 0 && (
+                <p className="mt-3 text-sm text-muted-text">
+                  {unprintableNames.length} name{unprintableNames.length === 1 ? ' uses' : 's use'} an alphabet the PDF can't print (such as
+                  Chinese or Arabic), so {unprintableNames.length === 1 ? 'it appears' : 'they appear'} as "Client (row N)" in the PDF. The
+                  table and CSV keep the original names.
+                </p>
+              )}
 
               <div className="mt-6 overflow-x-auto">
                 <table className="w-full min-w-[560px] text-left text-sm tabular-nums">
