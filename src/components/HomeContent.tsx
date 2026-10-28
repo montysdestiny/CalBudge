@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { Button } from '@/components/Blocks';
-import { PAGES } from '@/lib/pages';
+import { type LandingPage, PAGES } from '@/lib/pages';
 
-// Long-form homepage content below the hero. It's prerendered into
-// index.html at build time, so it's what search engines index. Every
-// number here mirrors src/lib/calc.ts; update both together.
+// Long-form content below the hero. It's prerendered at build time, so it's
+// what search engines index. The homepage gets the full method and FAQ;
+// landing pages get their own worked example and FAQ (from pages.ts) and
+// link back here for the method, so they don't read as near-duplicates.
+// Every number here mirrors src/lib/calc.ts; update both together.
 
 function SectionHeading({ id, children }: { id: string; children: ReactNode }) {
   return (
@@ -74,16 +76,62 @@ const FAQS = [
   },
 ];
 
-export default function HomeContent({
-  currentPath,
-  cta,
-  onStart,
-}: {
-  currentPath: string;
-  cta: string;
-  onStart: () => void;
-}) {
-  const otherPages = PAGES.filter(p => p.path !== currentPath);
+function Faq({ items }: { items: { q: string; a: string }[] }) {
+  return (
+    <section aria-labelledby="faq">
+      <SectionHeading id="faq">Frequently asked questions</SectionHeading>
+      <div className="mt-4 divide-y divide-line border-y border-line">
+        {items.map(f => (
+          <details key={f.q} className="group py-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink [&::-webkit-details-marker]:hidden">
+              {f.q}
+              <span aria-hidden="true" className="text-hint-text transition-transform group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-text">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Example({ example }: { example: NonNullable<LandingPage['example']> }) {
+  return (
+    <section aria-labelledby="example">
+      <SectionHeading id="example">{example.heading}</SectionHeading>
+      <Prose>{example.intro}</Prose>
+      <table className="mt-4 w-full text-left text-[0.9375rem]">
+        <thead>
+          <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
+            {example.columns.map((c, i) => (
+              <th key={c} className={`py-2 font-medium ${i > 0 ? 'text-right' : ''}`}>
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="tabular-nums">
+          {example.rows.map(row => (
+            <tr key={row[0]} className="border-b border-line">
+              {row.map((cell, i) => (
+                <td key={i} className={`py-2 ${i === 0 ? 'font-medium text-ink' : 'text-right text-muted-text'}`}>
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {example.note && <Prose>{example.note}</Prose>}
+    </section>
+  );
+}
+
+export default function HomeContent({ page, onStart }: { page: LandingPage; onStart: () => void }) {
+  const isHome = page.path === '/';
+  const otherPages = PAGES.filter(p => p.path !== page.path);
   return (
     <div className="mt-20 space-y-20">
       <section aria-labelledby="how-it-works">
@@ -99,108 +147,110 @@ export default function HomeContent({
         </ol>
       </section>
 
-      <section aria-labelledby="the-maths">
-        <SectionHeading id="the-maths">How CalBudge calculates your calories</SectionHeading>
-        <Prose>
-          No black box. These are the exact formulas and numbers the calculator uses, so you can check the working.
-        </Prose>
+      {page.example && <Example example={page.example} />}
 
-        <SubHeading>1. Basal metabolic rate (BMR)</SubHeading>
-        <Prose>
-          By default, BMR comes from the Mifflin-St Jeor equation, one of the most widely used formulas for estimating
-          resting energy needs:
-        </Prose>
-        <Formula>Men: 10 × weight (kg) + 6.25 × height (cm) − 5 × age + 5</Formula>
-        <Formula>Women: 10 × weight (kg) + 6.25 × height (cm) − 5 × age − 161</Formula>
-        <Prose>
-          If you enter your body fat percentage, CalBudge switches to the Katch-McArdle equation, which works from lean
-          mass and tends to be more accurate for people who know their body composition:
-        </Prose>
-        <Formula>370 + 21.6 × lean body mass (kg)</Formula>
+      {isHome ? (
+        <section aria-labelledby="the-maths">
+          <SectionHeading id="the-maths">How CalBudge calculates your calories</SectionHeading>
+          <Prose>
+            No black box. These are the exact formulas and numbers the calculator uses, so you can check the working.
+          </Prose>
 
-        <SubHeading>2. Total daily energy expenditure (TDEE)</SubHeading>
-        <Prose>
-          Your BMR is multiplied by an activity factor between 1.2 (sedentary) and 1.9 (very active), based on your gym
-          and cardio sessions per week. If you add your average daily steps, the factor is nudged up or down slightly to
-          match how much you move outside the gym.
-        </Prose>
+          <SubHeading>1. Basal metabolic rate (BMR)</SubHeading>
+          <Prose>
+            By default, BMR comes from the Mifflin-St Jeor equation, one of the most widely used formulas for estimating
+            resting energy needs:
+          </Prose>
+          <Formula>Men: 10 × weight (kg) + 6.25 × height (cm) − 5 × age + 5</Formula>
+          <Formula>Women: 10 × weight (kg) + 6.25 × height (cm) − 5 × age − 161</Formula>
+          <Prose>
+            If you enter your body fat percentage, CalBudge switches to the Katch-McArdle equation, which works from lean
+            mass and tends to be more accurate for people who know their body composition:
+          </Prose>
+          <Formula>370 + 21.6 × lean body mass (kg)</Formula>
 
-        <SubHeading>3. Your daily target</SubHeading>
-        <Prose>To lose or gain weight, your TDEE is adjusted by the pace you choose:</Prose>
-        <table className="mt-4 w-full text-left text-[0.9375rem]">
-          <thead>
-            <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
-              <th className="py-2 font-medium">Pace</th>
-              <th className="py-2 font-medium">Cutting</th>
-              <th className="py-2 font-medium">Bulking</th>
-            </tr>
-          </thead>
-          <tbody className="tabular-nums">
-            {PACES.map(p => (
-              <tr key={p.pace} className="border-b border-line">
-                <td className="py-2 font-medium text-ink">{p.pace}</td>
-                <td className="py-2 text-muted-text">{p.cut}</td>
-                <td className="py-2 text-muted-text">{p.bulk}</td>
+          <SubHeading>2. Total daily energy expenditure (TDEE)</SubHeading>
+          <Prose>
+            Your BMR is multiplied by an activity factor between 1.2 (sedentary) and 1.9 (very active), based on your gym
+            and cardio sessions per week. If you add your average daily steps, the factor is nudged up or down slightly to
+            match how much you move outside the gym.
+          </Prose>
+
+          <SubHeading>3. Your daily target</SubHeading>
+          <Prose>To lose or gain weight, your TDEE is adjusted by the pace you choose:</Prose>
+          <table className="mt-4 w-full text-left text-[0.9375rem]">
+            <thead>
+              <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
+                <th className="py-2 font-medium">Pace</th>
+                <th className="py-2 font-medium">Cutting</th>
+                <th className="py-2 font-medium">Bulking</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <Prose>
-          For safety, a cut never goes below 1.2 × your BMR, and no target ever goes below 1,200 calories a day. If your
-          chosen pace would cross that line, CalBudge raises your target and tells you.
-        </Prose>
+            </thead>
+            <tbody className="tabular-nums">
+              {PACES.map(p => (
+                <tr key={p.pace} className="border-b border-line">
+                  <td className="py-2 font-medium text-ink">{p.pace}</td>
+                  <td className="py-2 text-muted-text">{p.cut}</td>
+                  <td className="py-2 text-muted-text">{p.bulk}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Prose>
+            For safety, a cut never goes below 1.2 × your BMR, and no target ever goes below 1,200 calories a day. If your
+            chosen pace would cross that line, CalBudge raises your target and tells you.
+          </Prose>
 
-        <SubHeading>4. Macros</SubHeading>
-        <Prose>
-          If you give your bodyweight, CalBudge estimates a macro split: protein at 1.8 g per kg of bodyweight, fat at 25%
-          of your calories, and carbohydrates making up the rest.
-        </Prose>
+          <SubHeading>4. Macros</SubHeading>
+          <Prose>
+            If you give your bodyweight, CalBudge estimates a macro split: protein at 1.8 g per kg of bodyweight, fat at 25%
+            of your calories, and carbohydrates making up the rest.
+          </Prose>
 
-        <SubHeading>5. Meal-by-meal split</SubHeading>
-        <Prose>Your daily target is divided across six eating occasions:</Prose>
-        <table className="mt-4 w-full text-left text-[0.9375rem]">
-          <tbody className="tabular-nums">
-            {MEALS.map(m => (
-              <tr key={m.meal} className="border-b border-line">
-                <td className="py-2 font-medium text-ink">{m.meal}</td>
-                <td className="py-2 text-right text-muted-text">{m.share}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Prose>
-          Skip a meal you don't eat and its calories are spread across the others in proportion to their size.
-        </Prose>
+          <SubHeading>5. Meal-by-meal split</SubHeading>
+          <Prose>Your daily target is divided across six eating occasions:</Prose>
+          <table className="mt-4 w-full text-left text-[0.9375rem]">
+            <tbody className="tabular-nums">
+              {MEALS.map(m => (
+                <tr key={m.meal} className="border-b border-line">
+                  <td className="py-2 font-medium text-ink">{m.meal}</td>
+                  <td className="py-2 text-right text-muted-text">{m.share}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Prose>
+            Skip a meal you don't eat and its calories are spread across the others in proportion to their size.
+          </Prose>
 
-        <SubHeading>6. Time to your target weight</SubHeading>
-        <Prose>
-          If you set a target weight, CalBudge estimates the timeline using roughly 7,700 calories per kilogram of body
-          weight. Real progress varies with water weight, adherence and metabolic adaptation, so treat it as a rough guide.
-        </Prose>
-      </section>
+          <SubHeading>6. Time to your target weight</SubHeading>
+          <Prose>
+            If you set a target weight, CalBudge estimates the timeline using roughly 7,700 calories per kilogram of body
+            weight. Real progress varies with water weight, adherence and metabolic adaptation, so treat it as a rough guide.
+          </Prose>
+        </section>
+      ) : (
+        <section aria-labelledby="method">
+          <SectionHeading id="method">Where the numbers come from</SectionHeading>
+          <Prose>
+            Every figure on this page comes from the same formulas the calculator uses: Mifflin-St Jeor or Katch-McArdle
+            for BMR, an activity factor from your training and steps, and a target that never drops below 1.2 × your BMR
+            or 1,200 calories. See{' '}
+            <a href="/#the-maths" className="font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
+              the full method
+            </a>{' '}
+            for every equation and percentage.
+          </Prose>
+        </section>
+      )}
 
-      <section aria-labelledby="faq">
-        <SectionHeading id="faq">Frequently asked questions</SectionHeading>
-        <div className="mt-4 divide-y divide-line border-y border-line">
-          {FAQS.map(f => (
-            <details key={f.q} className="group py-4">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink [&::-webkit-details-marker]:hidden">
-                {f.q}
-                <span aria-hidden="true" className="text-hint-text transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-text">{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <Faq items={isHome ? FAQS : (page.faqs ?? [])} />
 
       <section className="border-t border-line pt-10">
         <h2 className="text-2xl font-bold tracking-tight text-ink">Ready to find your number?</h2>
         <Prose>It takes about a minute. Free, no signup.</Prose>
         <Button className="mt-6" onClick={onStart}>
-          {cta}
+          {page.cta}
         </Button>
       </section>
 

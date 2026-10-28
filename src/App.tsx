@@ -167,7 +167,8 @@ export default function App({ page }: { page: LandingPage }) {
               ) : (
                 <>
                   <a href="#how-it-works" className="hover:text-ink">How it works</a>
-                  <a href="#the-maths" className="hover:text-ink">The maths</a>
+                  {/* The full method lives on the homepage; landing pages link to it. */}
+                  <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-ink">The maths</a>
                   <a href="#faq" className="hover:text-ink">FAQ</a>
                   <a href="/coaches" className="hover:text-ink">For coaches</a>
                 </>
@@ -430,7 +431,7 @@ function Welcome({ page, onStart }: { page: LandingPage; onStart: () => void }) 
           ))}
         </div>
       )}
-      <HomeContent currentPath={page.path} cta={page.cta} onStart={onStart} />
+      <HomeContent page={page} onStart={onStart} />
     </section>
   );
 }
