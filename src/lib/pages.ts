@@ -22,8 +22,9 @@ export interface LandingPage {
   h1: string;
   intro: string;
   cta: string;
-  /** 'bulk' renders the coaches' CSV tool instead of the single-person calculator. */
-  kind?: 'calculator' | 'bulk';
+  /** 'bulk' renders the coaches' CSV tool instead of the single-person
+   *  calculator; 'privacy' renders the privacy policy. */
+  kind?: 'calculator' | 'bulk' | 'privacy';
   /** Goal pre-selected on the goal step when started from this page. */
   presetGoal?: Goal;
   /** Page-specific explainer shown above the shared "how it works" content. */
@@ -395,10 +396,25 @@ export const PAGES: LandingPage[] = [
       {
         heading: 'Private by design',
         paragraphs: [
-          'Your file is read and calculated entirely in your browser. Client names, measurements and results are never uploaded to a server, so you can use it with real client data.',
+          'Your file is read and calculated entirely in your browser. Client names, measurements and results are never uploaded to a server and never stored, not even in your browser’s storage. Press Clear, reload or close the tab and they are gone.',
+          'The page is also locked down so the browser blocks it from sending data to any other site (a Content-Security-Policy). The PDF and CSV reports are created on your device and saved straight to it. Page statistics only record that the page was visited, never file names, contents or results.',
         ],
       },
     ],
+  },
+  {
+    path: '/privacy',
+    kind: 'privacy',
+    ogTitle: 'Privacy policy',
+    ogSubtitle: 'Your answers and client files stay on your device',
+    linkLabel: 'Privacy policy',
+    title: 'Privacy Policy | CalBudge',
+    description:
+      'How CalBudge handles your data: calculator answers and coaches’ client files are processed in your browser and never uploaded or stored.',
+    h1: 'Privacy policy',
+    intro: '',
+    cta: 'Calculate my budget',
+    sections: [],
   },
 ];
 

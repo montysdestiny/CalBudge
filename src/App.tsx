@@ -17,6 +17,7 @@ import ExportAppCard from '@/components/kokonutui/export-app-card';
 import BulkEstimator from '@/components/BulkEstimator';
 import CookieBanner from '@/components/CookieBanner';
 import HomeContent from '@/components/HomeContent';
+import PrivacyPolicy from '@/components/PrivacyPolicy';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
 import { EXTERNAL_APPS, copyTargetsForApp } from '@/lib/appExport';
@@ -107,6 +108,9 @@ export default function App({ page }: { page: LandingPage }) {
 
   const imperial = state.unitSystem === 'imperial';
   const isBulk = page.kind === 'bulk';
+  const isPrivacy = page.kind === 'privacy';
+  // Pages without the single-person wizard: the logo just goes home.
+  const standalone = isBulk || isPrivacy;
 
   function pushSummary(label: string, value: string, editStepId: StepId) {
     setHistory(h => [...h.filter(e => !(e.editStepId === editStepId && e.label === label)), { label, value, editStepId }]);
@@ -147,7 +151,7 @@ export default function App({ page }: { page: LandingPage }) {
           <button
             type="button"
             onClick={() => {
-              if (isBulk) {
+              if (standalone) {
                 window.location.href = '/';
                 return;
               }
@@ -164,6 +168,11 @@ export default function App({ page }: { page: LandingPage }) {
             <nav aria-label="Page sections" className="hidden items-center gap-6 text-sm font-medium text-muted-text sm:flex">
               {isBulk ? (
                 <a href="/" className="hover:text-ink">Single calculator</a>
+              ) : isPrivacy ? (
+                <>
+                  <a href="/" className="hover:text-ink">Calculator</a>
+                  <a href="/coaches" className="hover:text-ink">For coaches</a>
+                </>
               ) : (
                 <>
                   <a href="#how-it-works" className="hover:text-ink">How it works</a>
@@ -176,7 +185,7 @@ export default function App({ page }: { page: LandingPage }) {
             </nav>
           )}
           {/* On the coaches page, units come from the CSV's column names. */}
-          {!isBulk && (
+          {!standalone && (
             <UnitSwitch
               imperial={imperial}
               onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
@@ -186,9 +195,11 @@ export default function App({ page }: { page: LandingPage }) {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className={`w-full ${isBulk ? 'max-w-3xl' : stepId === 'welcome' ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
+        <div className={`w-full ${isBulk ? 'max-w-3xl' : stepId === 'welcome' || isPrivacy ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
           {isBulk ? (
             <BulkEstimator page={page} />
+          ) : isPrivacy ? (
+            <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
           ) : stepId === 'welcome' ? (
             <Welcome page={page} onStart={() => goTo('entry')} />
           ) : (
@@ -328,6 +339,10 @@ export default function App({ page }: { page: LandingPage }) {
           <span>
             Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
             changing your diet.{' '}
+            <a href="/privacy" className="text-hint-text underline hover:text-ink">
+              Privacy policy
+            </a>
+            {' · '}
             <button
               type="button"
               onClick={() => setCookieBannerOpen(true)}
@@ -767,10 +782,10 @@ function StepResult({
     }
   }
 
-  const { target, cappedLow, cappedHigh, adjPct } = useMemo(() => computeTarget(state), [state]);
+  const { target, cappedLow, cappedHigh } = useMemo(() => computeTarget(state), [state]);
   const X = Math.round(target);
   const rows = useMemo(() => computeMealSplit(X), [X]);
-  const weeks = useMemo(() => computeGoalEstimateWeeks(state, adjPct), [state, adjPct]);
+  const weeks = useMemo(() => computeGoalEstimateWeeks(state, target), [state, target]);
 
   const macros = useMemo(() => (state.weightKg != null ? computeMacroSplit(state.weightKg, X) : null), [state.weightKg, X]);
 

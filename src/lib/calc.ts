@@ -214,12 +214,16 @@ export function computeMacroSplit(weightKg: number, targetKcal: number): MacroSp
   };
 }
 
-export function computeGoalEstimateWeeks(state: WizardState, adjPct: number): number | null {
-  if (state.targetWeightKg == null || state.goal === 'maintain' || !adjPct || state.weightKg == null) return null;
+// Uses the final target from computeTarget, not the pace percentage: when a
+// safety floor/ceiling has moved the target, the real daily deficit or
+// surplus is smaller than the pace implies. No estimate when the target no
+// longer moves weight in the goal's direction (e.g. a cut raised to the
+// 1,200 kcal minimum that ends up at or above maintenance).
+export function computeGoalEstimateWeeks(state: WizardState, targetKcal: number): number | null {
+  if (state.targetWeightKg == null || state.goal == null || state.goal === 'maintain' || state.weightKg == null) return null;
   const diff = Math.abs(state.targetWeightKg - state.weightKg);
   if (diff === 0) return null;
-  const totalKcal = diff * KCAL_PER_KG_FAT;
-  const dailyAdjustmentKcal = Math.abs((state.tdee ?? 0) * adjPct);
-  if (dailyAdjustmentKcal === 0) return null;
-  return totalKcal / (dailyAdjustmentKcal * 7);
+  const dailyAdjustmentKcal = state.goal === 'cut' ? (state.tdee ?? 0) - targetKcal : targetKcal - (state.tdee ?? 0);
+  if (dailyAdjustmentKcal <= 0) return null;
+  return (diff * KCAL_PER_KG_FAT) / (dailyAdjustmentKcal * 7);
 }

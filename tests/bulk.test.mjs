@@ -201,6 +201,12 @@ test('hand-checked results', () => {
   assert.equal(processCsv(`${HEADER},bmr\nB,male,30,180,80,0,0,maintain,,2000`).results[0].tdeeKcal, 2400)
   // Timeline: 6 kg * 7700 / (2759 * 0.2 * 7) = 11.96 weeks
   assert.equal(processCsv(`${HEADER},target_weight_kg\nT,male,30,180,80,4,2,cut,moderate,74`).results[0].weeksToTarget, 12)
+  // A target raised to the 1.2 x BMR floor gives a smaller real deficit:
+  // TDEE 2607.7, floor 2136, so 8 kg * 7700 / (471.7 * 7) = 18.66 weeks
+  // (the -27.5% pace alone would have claimed about 12).
+  assert.equal(processCsv(`${HEADER},target_weight_kg\nF,male,30,180,80,4,0,cut,aggressive,72`).results[0].weeksToTarget, 19)
+  // A cut raised to 1,200 kcal sits above this client's TDEE (1,142): no timeline.
+  assert.equal(processCsv(`${HEADER},target_weight_kg\nTiny,female,55,150,45,0,0,cut,aggressive,40`).results[0].weeksToTarget, null)
 })
 
 test('safety limits are applied and flagged', () => {
@@ -254,9 +260,9 @@ test('500 random clients match the single-person calculator exactly', () => {
   out.results.forEach((r, i) => {
     const s = { ...states[i] }
     s.tdee = computeTDEE(s)
-    const { target, adjPct } = computeTarget(s)
+    const { target } = computeTarget(s)
     const X = Math.round(target)
-    const weeks = computeGoalEstimateWeeks(s, adjPct)
+    const weeks = computeGoalEstimateWeeks(s, target)
     assert.equal(r.targetKcal, X, `client ${i} target`)
     assert.equal(r.tdeeKcal, Math.round(s.tdee), `client ${i} tdee`)
     assert.equal(r.bmrKcal, Math.round(computeBMR(s)), `client ${i} bmr`)

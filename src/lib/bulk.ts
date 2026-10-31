@@ -385,9 +385,9 @@ export function processCsv(text: string): BulkOutcome {
     };
     state.tdee = computeTDEE(state);
 
-    const { target: rawTarget, cappedLow, cappedHigh, adjPct } = computeTarget(state);
+    const { target: rawTarget, cappedLow, cappedHigh } = computeTarget(state);
     const targetKcal = Math.round(rawTarget);
-    const weeks = computeGoalEstimateWeeks(state, adjPct);
+    const weeks = computeGoalEstimateWeeks(state, rawTarget);
 
     results.push({
       row: rowNum,

@@ -131,7 +131,7 @@ function Example({ example }: { example: NonNullable<LandingPage['example']> }) 
 
 export default function HomeContent({ page, onStart }: { page: LandingPage; onStart: () => void }) {
   const isHome = page.path === '/';
-  const otherPages = PAGES.filter(p => p.path !== page.path);
+  const otherPages = PAGES.filter(p => p.path !== page.path && p.kind !== 'privacy');
   return (
     <div className="mt-20 space-y-20">
       <section aria-labelledby="how-it-works">

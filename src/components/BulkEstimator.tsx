@@ -33,6 +33,15 @@ function downloadBlob(blob: Blob, filename: string) {
 
 const ERRORS_SHOWN = 50;
 
+function LockIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-0.5 h-4 w-4 shrink-0 text-ink" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="7" width="10" height="7" rx="1.5" />
+      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+    </svg>
+  );
+}
+
 const COLUMNS: { name: string; required: string; notes: string }[] = [
   { name: 'name', required: 'Yes', notes: 'Client name or ID. Shown on the report.' },
   { name: 'goal', required: 'Yes', notes: 'cut, bulk or maintain' },
@@ -140,6 +149,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
     setErrors([]);
     setWarnings([]);
     setFatal(null);
+    setPdfError('');
     if (fileInput.current) fileInput.current.value = '';
   }
 
@@ -149,9 +159,6 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
     <section className="animate-block-in">
       <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">{page.h1}</h1>
       <p className="mt-4 text-lg text-muted-text">{page.intro}</p>
-      <p className="mt-3 text-sm font-medium text-ink">
-        Files are processed in your browser. Client data never leaves your computer.
-      </p>
 
       <ol className="mt-10 space-y-8">
         <li>
@@ -205,13 +212,32 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
               }}
             />
           </label>
+          <p className="mt-3 flex gap-2 text-sm text-muted-text">
+            <LockIcon />
+            <span>
+              <span className="font-medium text-ink">Your file never leaves this device.</span> It's read in your browser,
+              nothing is uploaded or stored, and the results disappear when you press Clear or close the tab.{' '}
+              <a href="/privacy" className="font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
+                Privacy policy
+              </a>
+            </span>
+          </p>
         </li>
       </ol>
 
       {hasOutput && (
         <div className="mt-10" aria-live="polite">
           <div className="font-mono text-sm text-hint-text">03</div>
-          <h2 className="mt-1 text-base font-bold text-ink">Results</h2>
+          <div className="mt-1 flex items-baseline justify-between gap-4">
+            <h2 className="text-base font-bold text-ink">Results</h2>
+            <button
+              type="button"
+              onClick={reset}
+              className="cursor-pointer border-none bg-transparent p-0 text-sm font-medium text-muted-text underline decoration-line underline-offset-4 hover:text-ink"
+            >
+              Clear
+            </button>
+          </div>
           <ErrorText>{fatal}</ErrorText>
 
           {!fatal && (
@@ -253,9 +279,6 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
                 </Button>
                 <Button variant="outline" onClick={() => downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`)}>
                   Download results (CSV)
-                </Button>
-                <Button variant="outline" onClick={reset}>
-                  Clear
                 </Button>
               </div>
               <ErrorText>{pdfError}</ErrorText>
