@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { CONSENT_STORAGE_KEY } from '@/lib/consent';
 
 // Plain-language privacy policy. Keep it in step with the code: what's
@@ -29,6 +29,25 @@ function List({ items }: { items: ReactNode[] }) {
 const Strong = ({ children }: { children: ReactNode }) => <strong className="font-bold text-ink">{children}</strong>;
 
 const linkClass = 'font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink';
+
+// The address is never in the prerendered HTML, where scrapers harvest it:
+// the server renders "calbudgehelp [at] outlook.com" and the browser turns it
+// into a mailto link after hydration.
+const EMAIL_USER = 'calbudgehelp';
+const EMAIL_DOMAIN = 'outlook.com';
+
+function ContactEmail() {
+  const [ready, setReady] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- must differ from the server render
+  useEffect(() => setReady(true), []);
+  if (!ready) return <span className="font-medium text-ink">{`${EMAIL_USER} [at] ${EMAIL_DOMAIN}`}</span>;
+  const address = `${EMAIL_USER}@${EMAIL_DOMAIN}`;
+  return (
+    <a href={`mailto:${address}`} className={linkClass}>
+      {address}
+    </a>
+  );
+}
 
 export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: () => void }) {
   return (
@@ -141,12 +160,8 @@ export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: 
 
       <H2>Changes and contact</H2>
       <P>
-        If this policy changes, we’ll update this page and the date at the top. For questions or requests, open an issue
-        on{' '}
-        <a href="https://github.com/montysdestiny/CalBudge/issues" className={linkClass} rel="noopener">
-          GitHub
-        </a>
-        .
+        If this policy changes, we’ll update this page and the date at the top. For questions or privacy requests,
+        email <ContactEmail />.
       </P>
     </article>
   );
