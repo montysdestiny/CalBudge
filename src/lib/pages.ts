@@ -67,8 +67,8 @@ export const PAGES: LandingPage[] = [
       {
         heading: 'What is TDEE?',
         paragraphs: [
-          'TDEE stands for total daily energy expenditure: every calorie your body uses in a day. It is made up of your basal metabolic rate (the energy you burn at rest), plus everything you burn moving around, training and digesting food.',
-          'Your TDEE is the same thing as your maintenance calories. It is the starting point for any diet: eat below it to lose weight, above it to gain.',
+          'TDEE stands for total daily energy expenditure: every calorie your body uses in a day. It is made up of your [basal metabolic rate](/bmr-calculator) (the energy you burn at rest), plus everything you burn moving around, training and digesting food.',
+          'Your TDEE is the same thing as your maintenance calories. It is the starting point for any diet: eat below it to [lose weight](/calorie-deficit-calculator), above it to [gain](/bulking-calculator).',
         ],
       },
       {
@@ -101,7 +101,7 @@ export const PAGES: LandingPage[] = [
       },
       {
         q: 'Does my TDEE change as I lose weight?',
-        a: 'Yes. A lighter body burns less energy: every 10 kg lost lowers your BMR by about 100 calories, and your TDEE by roughly 120 to 190 depending on how active you are. Recalculate after every 4 to 5 kg of change.',
+        a: 'Yes. A lighter body burns less energy: every 10 kg lost lowers your BMR by about 100 calories, and your TDEE by roughly 120 to 190 depending on how active you are. Recalculate after every 4 to 5 kg of change, and adjust your [deficit](/calorie-deficit-calculator) to match.',
       },
       {
         q: 'Should I count walking as cardio?',
@@ -134,7 +134,7 @@ export const PAGES: LandingPage[] = [
         heading: 'What is BMR?',
         paragraphs: [
           'Your basal metabolic rate is the energy your body needs just to stay alive: breathing, circulation, keeping organs running. For most people it makes up the largest share of the calories they burn each day.',
-          'BMR is not how much you should eat. To get your daily calorie needs, BMR is multiplied by an activity factor to give your TDEE.',
+          'BMR is not how much you should eat. To get your daily calorie needs, BMR is multiplied by an activity factor to give your [TDEE](/tdee-calculator).',
         ],
       },
       {
@@ -158,12 +158,12 @@ export const PAGES: LandingPage[] = [
         ['BMR (Mifflin-St Jeor)', '1,345'],
         ['BMR (Katch-McArdle, at 28% body fat)', '1,381'],
       ],
-      note: 'For Katch-McArdle, her lean mass is 65 kg × 0.72 = 46.8 kg, so her BMR is 370 + 21.6 × 46.8 = 1,381. The two equations land within 40 calories of each other here. They drift further apart for very muscular people, where Katch-McArdle is usually the better guide. Training 3 times a week, her TDEE comes to about 1,970 calories.',
+      note: 'For Katch-McArdle, her lean mass is 65 kg × 0.72 = 46.8 kg, so her BMR is 370 + 21.6 × 46.8 = 1,381. The two equations land within 40 calories of each other here. They drift further apart for very muscular people, where Katch-McArdle is usually the better guide. Training 3 times a week, her [TDEE](/tdee-calculator) comes to about 1,970 calories.',
     },
     faqs: [
       {
         q: 'Should I eat below my BMR to lose weight?',
-        a: 'For most people, no. Your BMR is what your body needs at complete rest, before you move at all. CalBudge never sets a weight-loss target below 1.2 times your BMR, and never below 1,200 calories a day.',
+        a: 'For most people, no. Your BMR is what your body needs at complete rest, before you move at all. The [calorie deficit calculator](/calorie-deficit-calculator) never sets a weight-loss target below 1.2 times your BMR, and never below 1,200 calories a day.',
       },
       {
         q: 'Why does BMR go down with age?',
@@ -200,7 +200,7 @@ export const PAGES: LandingPage[] = [
       {
         heading: 'What is a calorie deficit?',
         paragraphs: [
-          'A calorie deficit means eating fewer calories than your body burns (your TDEE). Your body makes up the difference from stored energy, mostly fat, so you lose weight over time.',
+          'A calorie deficit means eating fewer calories than your body burns (your [TDEE](/tdee-calculator)). Your body makes up the difference from stored energy, mostly fat, so you lose weight over time.',
         ],
       },
       {
@@ -231,7 +231,7 @@ export const PAGES: LandingPage[] = [
       },
       {
         q: 'How fast should I lose weight?',
-        a: 'A common guideline is 0.5% to 1% of your bodyweight per week. Slower losses make it easier to keep muscle and stick to the plan; faster ones are harder to sustain and usually cost more muscle.',
+        a: 'A common guideline is 0.5% to 1% of your bodyweight per week. Slower losses make it easier to keep muscle (especially with enough protein, see the [macro calculator](/macro-calculator)) and stick to the plan; faster ones are harder to sustain and usually cost more muscle.',
       },
       {
         q: 'Why did CalBudge raise my calorie target?',
@@ -243,7 +243,7 @@ export const PAGES: LandingPage[] = [
       },
       {
         q: 'Should I eat back the calories I burn exercising?',
-        a: 'No. Your training is already counted in your TDEE through the activity factor, so eating those calories back would cancel out part of your deficit.',
+        a: 'No. Your training is already counted in your [TDEE](/tdee-calculator) through the activity factor, so eating those calories back would cancel out part of your deficit.',
       },
     ],
   },
@@ -264,14 +264,14 @@ export const PAGES: LandingPage[] = [
       {
         heading: 'How many calories do you need to bulk?',
         paragraphs: [
-          'To build muscle efficiently you need a calorie surplus: eating more than your TDEE. CalBudge offers three paces: mild (10% above your TDEE), moderate (20% above) and aggressive (25% above).',
+          'To build muscle efficiently you need a calorie surplus: eating more than your [TDEE](/tdee-calculator). CalBudge offers three paces: mild (10% above your TDEE), moderate (20% above) and aggressive (25% above).',
           'A mild surplus, often called a lean bulk, keeps fat gain to a minimum. A bigger surplus can help if you struggle to gain weight, at the cost of more fat.',
         ],
       },
       {
         heading: 'Protein and macros for bulking',
         paragraphs: [
-          'Your results include a macro estimate: protein at 1.8 g per kg of bodyweight, fat at 25% of your calories, and carbohydrates filling the rest to fuel your training. The meal split includes pre- and post-workout meals.',
+          'Your results include a [macro estimate](/macro-calculator): protein at 1.8 g per kg of bodyweight, fat at 25% of your calories, and carbohydrates filling the rest to fuel your training. The meal split includes pre- and post-workout meals.',
         ],
       },
     ],
@@ -326,8 +326,8 @@ export const PAGES: LandingPage[] = [
       {
         heading: 'How your macros are calculated',
         paragraphs: [
-          'First CalBudge works out your daily calorie target from your TDEE and goal. That target is then split into macros: protein at 1.8 g per kg of bodyweight, fat at 25% of your calories, and carbohydrates making up the remainder.',
-          'Protein is set from bodyweight rather than as a percentage, so it stays high enough to protect muscle whether you are cutting or bulking.',
+          'First CalBudge works out your daily calorie target from your [TDEE](/tdee-calculator) and goal. That target is then split into macros: protein at 1.8 g per kg of bodyweight, fat at 25% of your calories, and carbohydrates making up the remainder.',
+          'Protein is set from bodyweight rather than as a percentage, so it stays high enough to protect muscle whether you are [cutting](/calorie-deficit-calculator) or [bulking](/bulking-calculator).',
         ],
       },
       {
@@ -390,7 +390,7 @@ export const PAGES: LandingPage[] = [
         heading: 'What the report includes',
         paragraphs: [
           'The PDF starts with a summary page listing every client with their goal, calorie target and macros. Each client then gets their own page with their daily target, maintenance calories (TDEE), BMR, a macro table with grams and calories, a meal-by-meal split and, if you included a target weight, an estimated timeline.',
-          'Every client is calculated with exactly the same formulas and safety limits as the single-person calculator: Mifflin-St Jeor or Katch-McArdle for BMR, an activity factor from training and steps, and a target that never drops below 1.2 times BMR or 1,200 calories.',
+          'Every client is calculated with exactly the same formulas and safety limits as the [single-person calculator](/): [Mifflin-St Jeor or Katch-McArdle for BMR](/bmr-calculator), an activity factor from training and steps, and a target that never drops below 1.2 times BMR or 1,200 calories.',
         ],
       },
       {

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Button, ErrorText } from '@/components/Blocks';
+import RichText from '@/components/RichText';
 import {
   type ClientResult,
   type RowError,
@@ -13,6 +14,7 @@ import {
   processCsv,
   resultsToCsv,
 } from '@/lib/bulk';
+import { track } from '@/lib/consent';
 import type { LandingPage } from '@/lib/pages';
 
 // The BOM makes Excel open UTF-8 CSVs with accented names intact.
@@ -106,6 +108,8 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
       return;
     }
     const out = processCsv(decoded.text);
+    // Counts only: names and measurements never go to analytics.
+    track('coaches_upload', { clients: out.results.length, error_rows: out.errors.length, failed: out.fatal ? 1 : 0 });
     setResults(out.results);
     setErrors(out.errors);
     setWarnings(out.warnings);
@@ -136,6 +140,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
         fonts = { regular, bold };
       }
       generateBulkReport(results, `calbudge-client-report-${dateStamp()}.pdf`, fonts);
+      track('coaches_report', { format: 'pdf', clients: results.length });
     } catch {
       setPdfError("Couldn't generate the PDF. Check your connection and try again.");
     } finally {
@@ -277,7 +282,13 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
                 <Button onClick={downloadPdf} disabled={pdfBusy}>
                   {pdfBusy ? 'Generating...' : 'Download PDF report'}
                 </Button>
-                <Button variant="outline" onClick={() => downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`)}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`);
+                    track('coaches_report', { format: 'csv', clients: results.length });
+                  }}
+                >
                   Download results (CSV)
                 </Button>
               </div>
@@ -331,7 +342,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
           <h2 className="text-2xl font-bold tracking-tight text-ink">{sec.heading}</h2>
           {sec.paragraphs.map(para => (
             <p key={para.slice(0, 40)} className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">
-              {para}
+              <RichText text={para} />
             </p>
           ))}
         </section>

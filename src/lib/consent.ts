@@ -85,3 +85,11 @@ export function loadGoogleAnalytics() {
   script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
   document.head.appendChild(script);
 }
+
+/** Conversion events for GA (calculator_start, results_view, export, ...).
+ *  A no-op unless the visitor accepted cookies: gtag only exists then, and
+ *  the ga-disable flag stops it after a later decline. Never pass personal
+ *  data (names, measurements): only labels and counts. */
+export function track(event: string, params: Record<string, string | number> = {}) {
+  window.gtag?.('event', event, params);
+}

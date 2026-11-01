@@ -18,6 +18,7 @@ import BulkEstimator from '@/components/BulkEstimator';
 import CookieBanner from '@/components/CookieBanner';
 import HomeContent from '@/components/HomeContent';
 import PrivacyPolicy from '@/components/PrivacyPolicy';
+import RichText from '@/components/RichText';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
 import { EXTERNAL_APPS, copyTargetsForApp } from '@/lib/appExport';
@@ -37,7 +38,7 @@ import {
   lbToKg,
   redistributeMealSplit,
 } from '@/lib/calc';
-import { readConsent } from '@/lib/consent';
+import { readConsent, track } from '@/lib/consent';
 import type { LandingPage } from '@/lib/pages';
 import { decodePlan, encodePlan } from '@/lib/share';
 
@@ -97,6 +98,7 @@ export default function App({ page }: { page: LandingPage }) {
     if (!plan) return;
     setState(plan);
     setSharedView(true);
+    track('shared_plan_open');
     setStepId('result');
   }, []);
   // Extra display-only fields (original raw input units, kept separate from
@@ -201,7 +203,13 @@ export default function App({ page }: { page: LandingPage }) {
           ) : isPrivacy ? (
             <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
           ) : stepId === 'welcome' ? (
-            <Welcome page={page} onStart={() => goTo('entry')} />
+            <Welcome
+              page={page}
+              onStart={() => {
+                track('calculator_start', { source: page.path });
+                goTo('entry');
+              }}
+            />
           ) : (
             <>
               {history.map((h, idx) => (
@@ -320,6 +328,7 @@ export default function App({ page }: { page: LandingPage }) {
                 if (targetWeightRaw != null) {
                   pushSummary('Target weight', `${targetWeightRaw}${imperial ? 'lb' : 'kg'}`, 'goal-estimate');
                 }
+                track('results_view', { goal: state.goal ?? 'unknown' });
                 goTo('result');
               }}
             />
@@ -439,7 +448,7 @@ function Welcome({ page, onStart }: { page: LandingPage; onStart: () => void }) 
               <h2 className="text-2xl font-bold tracking-tight text-ink">{sec.heading}</h2>
               {sec.paragraphs.map(para => (
                 <p key={para.slice(0, 40)} className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">
-                  {para}
+                  <RichText text={para} />
                 </p>
               ))}
             </section>
@@ -777,6 +786,7 @@ function StepResult({
     try {
       await navigator.clipboard.writeText(window.location.origin + window.location.pathname + encodePlan(state));
       setLinkStatus('copied');
+      track('share_link_copy');
     } catch {
       setLinkStatus('failed');
     }
@@ -821,6 +831,7 @@ function StepResult({
       const { exportNodeAsImage, exportNodeAsPdf } = await import('@/lib/export');
       if (kind === 'image') await exportNodeAsImage(exportRef.current, 'calbudge-budget.png');
       else await exportNodeAsPdf(exportRef.current, 'calbudge-budget.pdf');
+      track('export', { format: kind });
     } catch {
       setExportError(`Could not generate the ${kind === 'image' ? 'image' : 'PDF'}. Try again.`);
     } finally {
@@ -998,7 +1009,13 @@ function StepResult({
         <Button variant="outline" onClick={() => handleExport('pdf')} disabled={exportBusy !== null}>
           {exportBusy === 'pdf' ? 'Exporting...' : 'Download PDF'}
         </Button>
-        <Button variant="outline" onClick={() => setShowExportApps(true)}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setShowExportApps(true);
+            track('export', { format: 'app' });
+          }}
+        >
           Export to app
         </Button>
         <Button variant="outline" onClick={copyPlanLink}>

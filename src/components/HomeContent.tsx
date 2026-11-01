@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button } from '@/components/Blocks';
+import RichText from '@/components/RichText';
 import { type LandingPage, PAGES } from '@/lib/pages';
 
 // Long-form content below the hero. It's prerendered at build time, so it's
@@ -22,6 +23,15 @@ function SubHeading({ children }: { children: ReactNode }) {
 
 function Prose({ children }: { children: ReactNode }) {
   return <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-text">{children}</p>;
+}
+
+// Small "→ calculator" link beside a method heading.
+function InlineLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} className="ml-2 text-sm font-medium text-muted-text underline decoration-line underline-offset-4 hover:text-ink">
+      {children}
+    </a>
+  );
 }
 
 function Formula({ children }: { children: ReactNode }) {
@@ -89,7 +99,9 @@ function Faq({ items }: { items: { q: string; a: string }[] }) {
                 +
               </span>
             </summary>
-            <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-text">{f.a}</p>
+            <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-text">
+              <RichText text={f.a} />
+            </p>
           </details>
         ))}
       </div>
@@ -101,7 +113,9 @@ function Example({ example }: { example: NonNullable<LandingPage['example']> }) 
   return (
     <section aria-labelledby="example">
       <SectionHeading id="example">{example.heading}</SectionHeading>
-      <Prose>{example.intro}</Prose>
+      <Prose>
+        <RichText text={example.intro} />
+      </Prose>
       <table className="mt-4 w-full text-left text-[0.9375rem]">
         <thead>
           <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
@@ -124,7 +138,11 @@ function Example({ example }: { example: NonNullable<LandingPage['example']> }) 
           ))}
         </tbody>
       </table>
-      {example.note && <Prose>{example.note}</Prose>}
+      {example.note && (
+        <Prose>
+          <RichText text={example.note} />
+        </Prose>
+      )}
     </section>
   );
 }
@@ -156,7 +174,9 @@ export default function HomeContent({ page, onStart }: { page: LandingPage; onSt
             No black box. These are the exact formulas and numbers the calculator uses, so you can check the working.
           </Prose>
 
-          <SubHeading>1. Basal metabolic rate (BMR)</SubHeading>
+          <SubHeading>
+          1. Basal metabolic rate (BMR) <InlineLink href="/bmr-calculator">BMR calculator</InlineLink>
+        </SubHeading>
           <Prose>
             By default, BMR comes from the Mifflin-St Jeor equation, one of the most widely used formulas for estimating
             resting energy needs:
@@ -169,14 +189,19 @@ export default function HomeContent({ page, onStart }: { page: LandingPage; onSt
           </Prose>
           <Formula>370 + 21.6 × lean body mass (kg)</Formula>
 
-          <SubHeading>2. Total daily energy expenditure (TDEE)</SubHeading>
+          <SubHeading>
+          2. Total daily energy expenditure (TDEE) <InlineLink href="/tdee-calculator">TDEE calculator</InlineLink>
+        </SubHeading>
           <Prose>
             Your BMR is multiplied by an activity factor between 1.2 (sedentary) and 1.9 (very active), based on your gym
             and cardio sessions per week. If you add your average daily steps, the factor is nudged up or down slightly to
             match how much you move outside the gym.
           </Prose>
 
-          <SubHeading>3. Your daily target</SubHeading>
+          <SubHeading>
+          3. Your daily target <InlineLink href="/calorie-deficit-calculator">Deficit</InlineLink>{' '}
+          <InlineLink href="/bulking-calculator">Bulking</InlineLink>
+        </SubHeading>
           <Prose>To lose or gain weight, your TDEE is adjusted by the pace you choose:</Prose>
           <table className="mt-4 w-full text-left text-[0.9375rem]">
             <thead>
@@ -201,7 +226,9 @@ export default function HomeContent({ page, onStart }: { page: LandingPage; onSt
             chosen pace would cross that line, CalBudge raises your target and tells you.
           </Prose>
 
-          <SubHeading>4. Macros</SubHeading>
+          <SubHeading>
+          4. Macros <InlineLink href="/macro-calculator">Macro calculator</InlineLink>
+        </SubHeading>
           <Prose>
             If you give your bodyweight, CalBudge estimates a macro split: protein at 1.8 g per kg of bodyweight, fat at 25%
             of your calories, and carbohydrates making up the rest.
