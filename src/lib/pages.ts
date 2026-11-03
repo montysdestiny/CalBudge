@@ -188,7 +188,7 @@ export const PAGES: LandingPage[] = [
     ogTitle: 'Calorie Deficit Calculator',
     ogSubtitle: 'How much to eat to lose weight',
     linkLabel: 'Calorie deficit calculator',
-    title: 'Calorie Deficit Calculator: How Much to Eat to Lose Weight | CalBudge',
+    title: 'Calorie Deficit Calculator for Weight Loss | CalBudge',
     description:
       'Free calorie deficit calculator. Choose a mild, moderate or aggressive pace and get a daily calorie target for weight loss, split meal by meal.',
     h1: 'Calorie deficit calculator',
@@ -378,7 +378,7 @@ export const PAGES: LandingPage[] = [
     ogTitle: 'Bulk Macro Calculator for Coaches',
     ogSubtitle: 'Upload your clients, get a report for each',
     linkLabel: 'Bulk calculator for coaches',
-    title: 'Bulk Macro Calculator for Coaches: Client Reports from a CSV | CalBudge',
+    title: 'Bulk Macro Calculator for Coaches: CSV Reports | CalBudge',
     description:
       'Free bulk calorie and macro calculator for coaches. Upload a CSV of clients and download a PDF report with targets, macros and meal splits for each.',
     h1: 'Bulk macro calculator for coaches',

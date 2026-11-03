@@ -55,6 +55,11 @@ for (const page of PAGES) {
   }
   html = setTag(html, /(<meta property="og:image" content=")[^"]*(")/, image)
   html = setTag(html, /(<meta name="twitter:image" content=")[^"]*(")/, image)
+  // The policy page isn't an application: describe it as a plain web page.
+  if (page.kind === 'privacy') {
+    const webPage = { '@context': 'https://schema.org', '@type': 'WebPage', name: page.h1, url, description: page.description }
+    html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => `<script type="application/ld+json">${JSON.stringify(webPage)}</script>`)
+  }
   if (page.path !== '/') {
     const breadcrumbs = {
       '@context': 'https://schema.org',
