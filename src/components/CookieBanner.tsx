@@ -11,7 +11,7 @@ export default function CookieBanner({ onClose }: { onClose: () => void }) {
     <div
       role="dialog"
       aria-label="Cookie preferences"
-      className="animate-block-in fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl rounded-lg border border-line bg-paper p-5 shadow-[0_8px_24px_rgba(27,42,74,0.12)]"
+      className="animate-block-in fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl rounded-2xl border border-line bg-card p-5 shadow-[0_8px_24px_rgba(27,42,74,0.12)]"
     >
       <p className="text-sm text-muted-text">
         We'd like to use Google Analytics cookies to understand how people use CalBudge. Your calculator answers and

@@ -8,7 +8,7 @@ export function staggerDelay(index: number) {
 }
 export { STAGGER_MS };
 
-/** A 2px-bordered block — the base unit of the ledger's visual language. */
+/** A white card: the base unit of the wizard and results. */
 export function Block({
   children,
   className,
@@ -20,7 +20,7 @@ export function Block({
 }) {
   return (
     <div
-      className={cn('animate-block-in rounded-lg border-2 border-ink bg-paper', className)}
+      className={cn('animate-block-in rounded-2xl border border-line bg-card', className)}
       style={style}
     >
       {children}
@@ -32,30 +32,21 @@ export function SummaryRow({
   label,
   value,
   onEdit,
-  index,
 }: {
   label: string;
   value: string;
   onEdit: () => void;
-  index: number;
 }) {
   return (
-    <Block
-      className="mb-2 flex items-center justify-between px-4 py-3 text-[0.9375rem] transition-colors hover:bg-hover-tint"
-      style={staggerDelay(index)}
-    >
-      <span className="font-medium text-muted-text">{label}</span>
-      <span>
-        <span className="font-bold tabular-nums">{value}</span>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="ml-3 cursor-pointer border-none bg-none p-0 text-[0.8125rem] text-ink underline"
-        >
+    <div className="animate-block-in border-b border-line py-3 text-sm last:border-b-0">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-medium text-muted-text">{label}</span>
+        <button type="button" onClick={onEdit} className="cursor-pointer border-none bg-transparent p-0 text-[0.8125rem] font-medium text-ink underline underline-offset-2">
           Edit
         </button>
-      </span>
-    </Block>
+      </div>
+      <div className="mt-0.5 font-bold text-ink tabular-nums">{value}</div>
+    </div>
   );
 }
 
@@ -88,9 +79,9 @@ export function NumberInput(props: React.InputHTMLAttributes<HTMLInputElement>) 
     <input
       type="number"
       className={cn(
-        'w-full rounded-lg border-2 border-ink bg-paper px-3 py-2.5 text-base font-bold text-ink tabular-nums',
-        'shadow-[0_0_0_var(--color-accent)] transition-[transform,box-shadow,background] duration-100 ease-out',
-        'focus:-translate-x-0.5 focus:-translate-y-0.5 focus:bg-focus-bg focus:shadow-[2px_2px_0_var(--color-accent)] focus:outline-none',
+        'w-full rounded-lg border border-input bg-card px-3.5 py-3 text-base font-bold text-ink tabular-nums',
+        'transition-[border-color,box-shadow] duration-150 ease-out hover:border-ink',
+        'focus:border-ink focus:shadow-[0_0_0_3px_rgb(201_162_39_/_0.35)] focus:outline-none',
         className
       )}
       {...rest}
@@ -120,10 +111,8 @@ export function ToggleGroup<T extends string>({
               type="button"
               onClick={() => onChange(opt.value)}
               className={cn(
-                'cursor-pointer rounded-lg border-2 border-ink px-4 py-2 text-[0.9375rem] font-medium',
-                'shadow-[0_0_0_var(--color-ink)] transition-[transform,box-shadow,background] duration-100 ease-out',
-                'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-x-0 active:translate-y-0 active:shadow-none active:duration-[50ms]',
-                selected ? 'bg-ink text-paper hover:bg-ink-hover' : 'bg-paper text-ink hover:bg-hover-tint'
+                'cursor-pointer rounded-lg border px-4 py-2.5 text-[0.9375rem] font-semibold transition-colors duration-150',
+                selected ? 'border-ink bg-ink text-paper hover:bg-ink-hover' : 'border-input bg-card text-ink hover:border-ink'
               )}
             >
               {opt.label}
@@ -140,15 +129,17 @@ export function Button({
   className,
   type = 'button',
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'solid' | 'outline' }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'solid' | 'outline' | 'gold' }) {
   return (
     <button
       type={type}
       className={cn(
-        'cursor-pointer rounded-lg border-2 border-ink px-5 py-3 text-[0.9375rem] font-bold transition-colors duration-150',
+        'cursor-pointer rounded-lg border border-ink px-5 py-3 text-[0.9375rem] font-bold transition-colors duration-150',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         'disabled:cursor-not-allowed disabled:border-disabled disabled:bg-disabled disabled:text-paper',
-        variant === 'solid' ? 'bg-ink text-paper hover:bg-ink-hover' : 'bg-paper text-ink hover:bg-hover-tint',
+        variant === 'solid' && 'bg-ink text-paper hover:bg-ink-hover',
+        variant === 'outline' && 'bg-transparent text-ink hover:bg-hover-tint',
+        variant === 'gold' && 'border-accent bg-accent text-ink hover:border-accent-hover hover:bg-accent-hover',
         className
       )}
       {...props}

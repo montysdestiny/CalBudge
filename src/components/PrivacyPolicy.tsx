@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react';
+import { Container } from '@/components/Section';
 import { CONSENT_STORAGE_KEY } from '@/lib/consent';
 
 // Plain-language privacy policy. Keep it in step with the code: what's
@@ -8,17 +9,34 @@ import { CONSENT_STORAGE_KEY } from '@/lib/consent';
 
 const LAST_UPDATED = '31 October 2026';
 
-function H2({ children }: { children: ReactNode }) {
-  return <h2 className="mt-12 text-2xl font-bold tracking-tight text-ink">{children}</h2>;
+const SECTIONS = [
+  'Your calculator answers',
+  'Client files on the coaches page',
+  'What we do collect',
+  'What’s stored on your device',
+  'Who processes data for us',
+  'Your rights',
+  'Children',
+  'Changes and contact',
+];
+
+const slug = (text: string) => text.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+
+function H2({ children }: { children: string }) {
+  return (
+    <h2 id={slug(children)} className="mt-14 scroll-mt-24 font-display text-[1.75rem] leading-tight font-bold tracking-tight text-ink">
+      {children}
+    </h2>
+  );
 }
 
 function P({ children }: { children: ReactNode }) {
-  return <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">{children}</p>;
+  return <p className="mt-3 text-base leading-relaxed text-muted-text">{children}</p>;
 }
 
 function List({ items }: { items: ReactNode[] }) {
   return (
-    <ul className="mt-3 list-disc space-y-2 pl-5 text-[0.9375rem] leading-relaxed text-muted-text">
+    <ul className="mt-3 list-disc space-y-2 pl-5 text-base leading-relaxed text-muted-text">
       {items.map((item, i) => (
         <li key={i}>{item}</li>
       ))}
@@ -51,18 +69,30 @@ function ContactEmail() {
 
 export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: () => void }) {
   return (
-    <article className="animate-block-in">
-      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">Privacy policy</h1>
-      <p className="mt-4 text-sm text-hint-text">Last updated {LAST_UPDATED}</p>
-
-      <div className="mt-8 rounded-lg border border-line bg-paper px-5 py-4">
-        <p className="text-[0.9375rem] leading-relaxed text-ink">
-          <Strong>The short version:</Strong> CalBudge has no accounts and no database. Your calculator answers and any
-          client file you open on the coaches page are processed in your browser. They are never uploaded to us and
-          never stored. Google Analytics only runs if you accept cookies.
-        </p>
-      </div>
-
+    <>
+      <section className="ledger-lines bg-ink pt-14 pb-16 sm:pt-20">
+        <Container className="relative">
+          <h1 className="animate-block-in font-display text-5xl leading-none font-bold tracking-[-0.03em] text-paper sm:text-7xl">Privacy policy</h1>
+          <p className="mt-4 text-sm text-onink-text">Last updated {LAST_UPDATED}</p>
+          <p className="mt-8 max-w-3xl border-l-2 border-accent pl-5 text-lg leading-relaxed text-paper">
+            <strong className="font-bold text-accent">The short version:</strong> CalBudge has no accounts and no database. Your calculator answers and any
+            client file you open on the coaches page are processed in your browser. They are never uploaded to us and
+            never stored. Google Analytics only runs if you accept cookies.
+          </p>
+        </Container>
+      </section>
+      <Container className="grid gap-12 py-14 lg:grid-cols-[240px_1fr] sm:py-20">
+        <nav aria-label="On this page" className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+          <div className="text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">On this page</div>
+          <ul className="mt-3 space-y-2 text-sm">
+            {SECTIONS.map(t => (
+              <li key={t}>
+                <a href={`#${slug(t)}`} className="text-muted-text hover:text-ink">{t}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <article className="max-w-2xl [&>h2:first-child]:mt-0">
       <H2>Your calculator answers</H2>
       <P>
         Everything you enter (age, height, weight, training, goals) is calculated in your browser. It is not sent to
@@ -163,6 +193,8 @@ export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: 
         If this policy changes, we’ll update this page and the date at the top. For questions or privacy requests,
         email <ContactEmail />.
       </P>
-    </article>
+        </article>
+      </Container>
+    </>
   );
 }

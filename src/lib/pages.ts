@@ -20,6 +20,8 @@ export interface LandingPage {
   /** Meta description, ~150 characters. */
   description: string;
   h1: string;
+  /** The phrase of the h1 shown in gold. */
+  h1Accent?: string;
   intro: string;
   cta: string;
   /** 'bulk' renders the coaches' CSV tool instead of the single-person
@@ -46,6 +48,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Work out your daily calorie budget in about a minute. BMR and TDEE calculated for you, split meal by meal, with a macro estimate. Free, no signup.',
     h1: 'Your daily calorie budget, split meal by meal.',
+    h1Accent: 'split meal by meal.',
     intro:
       'Answer a few questions about your body and training. Get a daily calorie target you can actually plan around. Takes about a minute, no signup.',
     cta: 'Calculate my budget',
@@ -60,6 +63,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free TDEE calculator. Find your total daily energy expenditure and maintenance calories from your age, size, training and daily steps. No signup.',
     h1: 'TDEE calculator: find your maintenance calories',
+    h1Accent: 'find your maintenance calories',
     intro:
       'Your TDEE is how many calories you burn in a day. Eat that much and your weight stays the same. Answer a few questions to get yours, plus a meal-by-meal plan built around it.',
     cta: 'Calculate my TDEE',
@@ -126,6 +130,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free BMR calculator using the Mifflin-St Jeor equation, or Katch-McArdle if you know your body fat percentage. See your BMR and TDEE side by side.',
     h1: 'BMR calculator',
+    h1Accent: 'BMR',
     intro:
       'Find your basal metabolic rate: the calories your body burns at complete rest. CalBudge uses Mifflin-St Jeor by default and switches to Katch-McArdle if you know your body fat percentage.',
     cta: 'Calculate my BMR',
@@ -192,6 +197,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free calorie deficit calculator. Choose a mild, moderate or aggressive pace and get a daily calorie target for weight loss, split meal by meal.',
     h1: 'Calorie deficit calculator',
+    h1Accent: 'Calorie deficit',
     intro:
       'Find out how many calories to eat to lose weight. Pick a pace, and get a daily target with built-in safety limits, split across your meals.',
     cta: 'Calculate my deficit',
@@ -256,6 +262,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free bulking calculator. Work out how many calories to eat to build muscle, from a lean bulk to an aggressive one, with a macro split and meal plan.',
     h1: 'Bulking calculator',
+    h1Accent: 'Bulking',
     intro:
       'Work out how many calories to eat to build muscle. Choose how fast you want to gain, and get a daily target with a protein-first macro split.',
     cta: 'Calculate my bulk',
@@ -319,6 +326,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free macro calculator. Get daily protein, carb and fat targets based on your bodyweight and goal, then copy them into MyFitnessPal, MacroFactor or Cal AI.',
     h1: 'Macro calculator',
+    h1Accent: 'Macro',
     intro:
       'Get daily protein, carb and fat targets built around your calorie budget and bodyweight. Copy them straight into your tracking app.',
     cta: 'Calculate my macros',
@@ -382,6 +390,7 @@ export const PAGES: LandingPage[] = [
     description:
       'Free bulk calorie and macro calculator for coaches. Upload a CSV of clients and download a PDF report with targets, macros and meal splits for each.',
     h1: 'Bulk macro calculator for coaches',
+    h1Accent: 'for coaches',
     intro:
       'Upload a spreadsheet of your clients and get calorie targets, macro splits and meal plans for all of them at once. Download a PDF report with a page per client, or a spreadsheet of results.',
     cta: 'Upload client file',

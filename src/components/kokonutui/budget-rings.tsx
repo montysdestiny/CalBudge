@@ -79,13 +79,14 @@ export default function BudgetRings({ rings, className }: { rings: RingDatum[]; 
           <CircleProgress data={r} index={i} key={r.label} />
         ))}
       </div>
-      <div className="ml-6 flex flex-col gap-3">
+      <div className="ml-4 flex min-w-0 flex-col gap-3 sm:ml-6">
         {rings.map(r => (
           <div className="flex flex-col" key={r.label}>
-            <span className="text-xs font-medium tracking-wide text-muted-text uppercase">{r.label}</span>
-            <span className="text-lg font-bold tabular-nums" style={{ color: r.color }}>
-              {r.display}
+            <span className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-text uppercase">
+              <span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ background: r.color }} />
+              {r.label}
             </span>
+            <span className="text-base font-bold text-ink tabular-nums">{r.display}</span>
           </div>
         ))}
       </div>

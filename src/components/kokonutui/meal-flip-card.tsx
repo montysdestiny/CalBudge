@@ -28,12 +28,12 @@ export default function MealFlipCard({ name, kcal, percentOfTotal, excluded, onT
 
   if (excluded) {
     return (
-      <div className="flex h-[132px] w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line p-4 text-center">
+      <div className="flex h-[132px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-input p-4 text-center">
         <span className="text-[0.9375rem] font-medium text-hint-text line-through">{name}</span>
         <button
           type="button"
           onClick={onToggleExclude}
-          className="flex cursor-pointer items-center gap-1 text-xs font-medium text-accent underline"
+          className="flex cursor-pointer items-center gap-1 text-xs font-medium text-gold-ink underline"
         >
           <Plus aria-hidden="true" className="h-3 w-3" />
           Add back
@@ -76,11 +76,11 @@ export default function MealFlipCard({ name, kcal, percentOfTotal, excluded, onT
           className={cn(
             "absolute inset-0 h-full w-full",
             "[backface-visibility:hidden] [transform:rotateY(0deg)]",
-            "flex flex-col justify-between rounded-lg border-2 border-ink bg-paper p-4"
+            "flex flex-col justify-between rounded-xl border border-line bg-card p-4"
           )}
         >
           <span className="pr-5 text-[0.9375rem] font-medium">{name}</span>
-          <span className="text-2xl font-bold tabular-nums">{kcal}</span>
+          <span className="font-display text-3xl font-bold tracking-tight tabular-nums">{kcal}</span>
         </div>
 
         {/* Back */}
@@ -88,7 +88,7 @@ export default function MealFlipCard({ name, kcal, percentOfTotal, excluded, onT
           className={cn(
             "meal-flip-back absolute inset-0 h-full w-full",
             "[backface-visibility:hidden] [transform:rotateY(180deg)]",
-            "flex flex-col justify-between rounded-lg border-2 border-ink bg-ink p-4 text-paper"
+            "flex flex-col justify-between rounded-xl bg-ink p-4 text-paper"
           )}
         >
           <span className="text-[0.9375rem] font-medium">{name}</span>

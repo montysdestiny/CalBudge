@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
+import { Lock } from 'lucide-react';
 import { Button, ErrorText } from '@/components/Blocks';
+import { AccentHeading, Container, SectionHeading, revealDelay } from '@/components/Section';
 import RichText from '@/components/RichText';
 import {
   type ClientResult,
@@ -34,15 +36,6 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 const ERRORS_SHOWN = 50;
-
-function LockIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-0.5 h-4 w-4 shrink-0 text-ink" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="3" y="7" width="10" height="7" rx="1.5" />
-      <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
-    </svg>
-  );
-}
 
 const COLUMNS: { name: string; required: string; notes: string }[] = [
   { name: 'name', required: 'Yes', notes: 'Client name or ID. Shown on the report.' },
@@ -159,218 +152,289 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
   }
 
   const hasOutput = results.length > 0 || errors.length > 0 || fatal;
+  const [reportSection, privacySection] = page.sections;
 
   return (
-    <section className="animate-block-in">
-      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">{page.h1}</h1>
-      <p className="mt-4 text-lg text-muted-text">{page.intro}</p>
-
-      <ol className="mt-10 space-y-8">
-        <li>
-          <div className="font-mono text-sm text-hint-text">01</div>
-          <h2 className="mt-1 text-base font-bold text-ink">Download the template</h2>
-          <p className="mt-1 text-sm text-muted-text">
-            One row per client. Fill it in with Excel, Google Sheets or Numbers and save as CSV.
-          </p>
-          <Button
-            variant="outline"
-            className="mt-3 py-2 text-sm"
-            onClick={() => downloadCsv(TEMPLATE_CSV, 'calbudge-clients-template.csv')}
-          >
-            Download template (CSV)
-          </Button>
-        </li>
-
-        <li>
-          <div className="font-mono text-sm text-hint-text">02</div>
-          <h2 className="mt-1 text-base font-bold text-ink">Upload your client file</h2>
-          <label
-            onDragOver={e => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={e => {
-              e.preventDefault();
-              setDragging(false);
-              const file = e.dataTransfer.files[0];
-              if (file) void handleFile(file);
-            }}
-            className={
-              'mt-3 flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent ' +
-              (dragging ? 'border-ink bg-hover-tint' : 'border-line hover:border-ink')
-            }
-          >
-            {/* pointer-events-none stops dragleave firing when the cursor crosses the text. */}
-            <span className="pointer-events-none font-bold text-ink">{fileName ?? 'Drop a CSV file here, or click to choose'}</span>
-            <span className="pointer-events-none mt-1 text-sm text-muted-text">
-              {fileName ? 'Drop or click to choose another file' : `Up to ${MAX_ROWS.toLocaleString()} clients per file`}
-            </span>
-            <input
-              ref={fileInput}
-              type="file"
-              accept=".csv,.tsv,.txt,text/csv"
-              className="sr-only"
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (file) void handleFile(file);
-              }}
-            />
-          </label>
-          <p className="mt-3 flex gap-2 text-sm text-muted-text">
-            <LockIcon />
-            <span>
-              <span className="font-medium text-ink">Your file never leaves this device.</span> It's read in your browser,
-              nothing is uploaded or stored, and the results disappear when you press Clear or close the tab.{' '}
-              <a href="/privacy" className="font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
-                Privacy policy
-              </a>
-            </span>
-          </p>
-        </li>
-      </ol>
-
-      {hasOutput && (
-        <div className="mt-10" aria-live="polite">
-          <div className="font-mono text-sm text-hint-text">03</div>
-          <div className="mt-1 flex items-baseline justify-between gap-4">
-            <h2 className="text-base font-bold text-ink">Results</h2>
-            <button
-              type="button"
-              onClick={reset}
-              className="cursor-pointer border-none bg-transparent p-0 text-sm font-medium text-muted-text underline decoration-line underline-offset-4 hover:text-ink"
-            >
-              Clear
-            </button>
+    <>
+      <section className="ledger-lines bg-ink pt-14 pb-44 text-center sm:pt-20">
+        <Container className="relative">
+          <div className="animate-block-in mx-auto inline-flex items-center gap-2 rounded-full border border-line-onink px-4 py-1.5 text-[0.8125rem] font-medium text-onink-text">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+            Free. No signup. Files stay in your browser.
           </div>
-          <ErrorText>{fatal}</ErrorText>
+          <h1 className="animate-block-in mx-auto mt-6 max-w-4xl font-display text-[2.75rem] leading-[1.04] font-bold tracking-[-0.03em] text-balance text-paper sm:text-7xl">
+            <AccentHeading text={page.h1} accent={page.h1Accent} />
+          </h1>
+          <p className="animate-block-in mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-onink-text">{page.intro}</p>
+        </Container>
+      </section>
 
-          {!fatal && (
-            <p className="mt-1 text-sm text-muted-text">
-              {results.length} client{results.length === 1 ? '' : 's'} calculated
-              {errors.length > 0 && `, ${errors.length} row${errors.length === 1 ? '' : 's'} need${errors.length === 1 ? 's' : ''} fixing`}.
-            </p>
-          )}
+      <Container className="relative z-10 -mt-32 max-w-5xl">
+        <div className="rounded-2xl border border-line bg-card p-6 shadow-[0_24px_60px_-20px_rgba(27,42,74,0.35)] sm:p-8">
+          <ol className="grid gap-8 md:grid-cols-[1fr_1.6fr]">
+            <li>
+              <div aria-hidden="true" className="font-display text-5xl leading-none font-bold text-accent">1</div>
+              <h2 className="mt-3 font-display text-xl font-bold tracking-tight text-ink">Download the template</h2>
+              <p className="mt-1.5 text-sm text-muted-text">
+                One row per client. Fill it in with Excel, Google Sheets or Numbers and save as CSV.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4 py-2.5 text-sm"
+                onClick={() => downloadCsv(TEMPLATE_CSV, 'calbudge-clients-template.csv')}
+              >
+                Download template (CSV)
+              </Button>
+            </li>
 
-          {warnings.map(w => (
-            <p key={w} className="mt-3 text-sm text-muted-text">
-              {w}
-            </p>
-          ))}
-
-          {errors.length > 0 && (
-            <ul className="mt-4 space-y-2 rounded-lg border border-deficit/40 px-4 py-3 text-sm">
-              {errors.slice(0, ERRORS_SHOWN).map(e => (
-                <li key={e.row}>
-                  <span className="font-bold text-deficit">
-                    Row {e.row} ({e.name}):
-                  </span>{' '}
-                  <span className="text-muted-text">{e.problems.join('; ')}</span>
-                </li>
-              ))}
-              {errors.length > ERRORS_SHOWN && (
-                <li className="font-medium text-muted-text">
-                  ...and {errors.length - ERRORS_SHOWN} more. Fix these first, then upload the file again.
-                </li>
-              )}
-            </ul>
-          )}
-
-          {results.length > 0 && (
-            <>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Button onClick={downloadPdf} disabled={pdfBusy}>
-                  {pdfBusy ? 'Generating...' : 'Download PDF report'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`);
-                    track('coaches_report', { format: 'csv', clients: results.length });
+            <li id="upload" className="scroll-mt-24">
+              <div aria-hidden="true" className="font-display text-5xl leading-none font-bold text-accent">2</div>
+              <h2 className="mt-3 font-display text-xl font-bold tracking-tight text-ink">Upload your client file</h2>
+              <label
+                onDragOver={e => {
+                  e.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={e => {
+                  e.preventDefault();
+                  setDragging(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) void handleFile(file);
+                }}
+                className={
+                  'mt-3 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-9 text-center transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent ' +
+                  (dragging ? 'border-ink bg-hover-tint' : 'border-input hover:border-ink')
+                }
+              >
+                {/* pointer-events-none stops dragleave firing when the cursor crosses the text. */}
+                <span className="pointer-events-none font-bold text-ink">{fileName ?? 'Drop a CSV file here, or click to choose'}</span>
+                <span className="pointer-events-none mt-1 text-sm text-muted-text">
+                  {fileName ? 'Drop or click to choose another file' : `Up to ${MAX_ROWS.toLocaleString()} clients per file`}
+                </span>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept=".csv,.tsv,.txt,text/csv"
+                  className="sr-only"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleFile(file);
                   }}
+                />
+              </label>
+              <p className="mt-3 flex gap-2 text-sm text-muted-text">
+                <Lock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-ink" />
+                <span>
+                  <span className="font-medium text-ink">Your file never leaves this device.</span> It's read in your browser,
+                  nothing is uploaded or stored, and the results disappear when you press Clear or close the tab.{' '}
+                  <a href="/privacy" className="font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
+                    Privacy policy
+                  </a>
+                </span>
+              </p>
+            </li>
+          </ol>
+
+          {hasOutput && (
+            <div className="mt-8 border-t border-line pt-8" aria-live="polite">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="font-display text-2xl font-bold tracking-tight text-ink">Results</h2>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm font-medium text-muted-text underline decoration-line underline-offset-4 hover:text-ink"
                 >
-                  Download results (CSV)
-                </Button>
+                  Clear
+                </button>
               </div>
-              <ErrorText>{pdfError}</ErrorText>
-              {unprintableNames.length > 0 && (
-                <p className="mt-3 text-sm text-muted-text">
-                  {unprintableNames.length} name{unprintableNames.length === 1 ? ' uses' : 's use'} an alphabet the PDF can't print (such as
-                  Chinese or Arabic), so {unprintableNames.length === 1 ? 'it appears' : 'they appear'} as "Client (row N)" in the PDF. The
-                  table and CSV keep the original names.
+              <ErrorText>{fatal}</ErrorText>
+
+              {!fatal && (
+                <p className="mt-1 text-sm text-muted-text">
+                  {results.length} client{results.length === 1 ? '' : 's'} calculated
+                  {errors.length > 0 && `, ${errors.length} row${errors.length === 1 ? '' : 's'} need${errors.length === 1 ? 's' : ''} fixing`}.
                 </p>
               )}
 
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm tabular-nums">
-                  <thead>
-                    <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
-                      <th className="py-2 pr-3 font-medium">Client</th>
-                      <th className="py-2 pr-3 font-medium">Goal</th>
-                      <th className="py-2 pr-3 text-right font-medium">Target</th>
-                      <th className="py-2 pr-3 text-right font-medium">TDEE</th>
-                      <th className="py-2 pr-3 text-right font-medium">Protein</th>
-                      <th className="py-2 pr-3 text-right font-medium">Carbs</th>
-                      <th className="py-2 text-right font-medium">Fat</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.map(r => (
-                      <tr key={r.row} className="border-b border-line">
-                        <td className="py-2 pr-3 font-medium text-ink">
-                          {r.name}
-                          {r.note && <div className="text-xs font-normal text-hint-text">{r.note}</div>}
-                        </td>
-                        <td className="py-2 pr-3 text-muted-text">{goalLabel(r)}</td>
-                        <td className="py-2 pr-3 text-right font-bold text-ink">{r.targetKcal.toLocaleString()}</td>
-                        <td className="py-2 pr-3 text-right text-muted-text">{r.tdeeKcal.toLocaleString()}</td>
-                        <td className="py-2 pr-3 text-right text-muted-text">{r.macros ? `${r.macros.proteinG} g` : '–'}</td>
-                        <td className="py-2 pr-3 text-right text-muted-text">{r.macros ? `${r.macros.carbsG} g` : '–'}</td>
-                        <td className="py-2 text-right text-muted-text">{r.macros ? `${r.macros.fatG} g` : '–'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+              {warnings.map(w => (
+                <p key={w} className="mt-3 text-sm text-muted-text">
+                  {w}
+                </p>
+              ))}
+
+              {errors.length > 0 && (
+                <ul className="mt-4 space-y-2 rounded-lg border border-deficit/40 px-4 py-3 text-sm">
+                  {errors.slice(0, ERRORS_SHOWN).map(e => (
+                    <li key={e.row}>
+                      <span className="font-bold text-deficit">
+                        Row {e.row} ({e.name}):
+                      </span>{' '}
+                      <span className="text-muted-text">{e.problems.join('; ')}</span>
+                    </li>
+                  ))}
+                  {errors.length > ERRORS_SHOWN && (
+                    <li className="font-medium text-muted-text">
+                      ...and {errors.length - ERRORS_SHOWN} more. Fix these first, then upload the file again.
+                    </li>
+                  )}
+                </ul>
+              )}
+
+              {results.length > 0 && (
+                <>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button onClick={downloadPdf} disabled={pdfBusy}>
+                      {pdfBusy ? 'Generating...' : 'Download PDF report'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        downloadCsv(resultsToCsv(results, separator), `calbudge-client-results-${dateStamp()}.csv`);
+                        track('coaches_report', { format: 'csv', clients: results.length });
+                      }}
+                    >
+                      Download results (CSV)
+                    </Button>
+                  </div>
+                  <ErrorText>{pdfError}</ErrorText>
+                  {unprintableNames.length > 0 && (
+                    <p className="mt-3 text-sm text-muted-text">
+                      {unprintableNames.length} name{unprintableNames.length === 1 ? ' uses' : 's use'} an alphabet the PDF can't print (such as
+                      Chinese or Arabic), so {unprintableNames.length === 1 ? 'it appears' : 'they appear'} as "Client (row N)" in the PDF. The
+                      table and CSV keep the original names.
+                    </p>
+                  )}
+
+                  <div className="mt-6 overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-left text-sm tabular-nums">
+                      <thead>
+                        <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
+                          <th className="py-2 pr-3 font-medium">Client</th>
+                          <th className="py-2 pr-3 font-medium">Goal</th>
+                          <th className="py-2 pr-3 text-right font-medium">Target</th>
+                          <th className="py-2 pr-3 text-right font-medium">TDEE</th>
+                          <th className="py-2 pr-3 text-right font-medium">Protein</th>
+                          <th className="py-2 pr-3 text-right font-medium">Carbs</th>
+                          <th className="py-2 text-right font-medium">Fat</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.map(r => (
+                          <tr key={r.row} className="border-b border-line">
+                            <td className="py-2.5 pr-3 font-medium text-ink">
+                              {r.name}
+                              {r.note && <div className="text-xs font-normal text-hint-text">{r.note}</div>}
+                            </td>
+                            <td className="py-2.5 pr-3 text-muted-text">{goalLabel(r)}</td>
+                            <td className="py-2.5 pr-3 text-right font-bold text-ink">{r.targetKcal.toLocaleString()}</td>
+                            <td className="py-2.5 pr-3 text-right text-muted-text">{r.tdeeKcal.toLocaleString()}</td>
+                            <td className="py-2.5 pr-3 text-right text-muted-text">{r.macros ? `${r.macros.proteinG} g` : '–'}</td>
+                            <td className="py-2.5 pr-3 text-right text-muted-text">{r.macros ? `${r.macros.carbsG} g` : '–'}</td>
+                            <td className="py-2.5 text-right text-muted-text">{r.macros ? `${r.macros.fatG} g` : '–'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
           )}
         </div>
+      </Container>
+
+      {reportSection && (
+        <section className="mt-24 sm:mt-32">
+          <Container className="grid items-center gap-12 md:grid-cols-[1.2fr_1fr]">
+            <div>
+              <SectionHeading eyebrow="The report">{reportSection.heading}</SectionHeading>
+              {reportSection.paragraphs.map(para => (
+                <p key={para.slice(0, 40)} className="mt-4 text-base leading-relaxed text-muted-text" data-reveal>
+                  <RichText text={para} />
+                </p>
+              ))}
+            </div>
+            <div data-reveal style={revealDelay(1)}>
+              <SampleReportPage />
+            </div>
+          </Container>
+        </section>
       )}
 
-      {page.sections.map(sec => (
-        <section key={sec.heading} className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight text-ink">{sec.heading}</h2>
-          {sec.paragraphs.map(para => (
-            <p key={para.slice(0, 40)} className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">
-              <RichText text={para} />
-            </p>
-          ))}
-        </section>
-      ))}
-
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold tracking-tight text-ink">File columns</h2>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
-                <th className="py-2 pr-3 font-medium">Column</th>
-                <th className="py-2 pr-3 font-medium">Required</th>
-                <th className="py-2 font-medium">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COLUMNS.map(c => (
-                <tr key={c.name} className="border-b border-line align-top">
-                  <td className="py-2 pr-3 font-mono text-[0.8125rem] text-ink">{c.name}</td>
-                  <td className="py-2 pr-3 text-muted-text">{c.required}</td>
-                  <td className="py-2 text-muted-text">{c.notes}</td>
-                </tr>
+      {privacySection && (
+        <section className="ledger-lines mt-24 bg-ink py-20 sm:mt-32 sm:py-24">
+          <Container className="relative grid gap-8 md:grid-cols-[1fr_1.6fr] md:gap-12">
+            <SectionHeading eyebrow="Your clients' data" onInk>
+              {privacySection.heading}
+            </SectionHeading>
+            <div>
+              {privacySection.paragraphs.map(para => (
+                <p key={para.slice(0, 40)} className="mt-4 text-base leading-relaxed text-onink-text first:mt-0" data-reveal>
+                  <RichText onInk text={para} />
+                </p>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </Container>
+        </section>
+      )}
+
+      <section className="mt-24 mb-24 sm:mt-32 sm:mb-32">
+        <Container>
+          <SectionHeading eyebrow="Reference">File columns</SectionHeading>
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-line bg-card" data-reveal>
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">
+                  <th className="px-5 py-3 font-medium">Column</th>
+                  <th className="px-5 py-3 font-medium">Required</th>
+                  <th className="px-5 py-3 font-medium">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COLUMNS.map(c => (
+                  <tr key={c.name} className="border-b border-line align-top last:border-b-0">
+                    <td className="px-5 py-3 font-mono text-[0.8125rem] text-ink">{c.name}</td>
+                    <td className="px-5 py-3 text-muted-text">{c.required}</td>
+                    <td className="px-5 py-3 text-muted-text">{c.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Container>
       </section>
-    </section>
+    </>
+  );
+}
+
+/** A page of the PDF, drawn in HTML from the template's first example client. */
+function SampleReportPage() {
+  const sample = processCsv(TEMPLATE_CSV).results[0];
+  return (
+    <div aria-label="Sample report page" role="img" className="mx-auto max-w-sm rounded-sm border border-line bg-card p-7 shadow-[0_24px_50px_-20px_rgba(27,42,74,0.4)]">
+      <div className="h-1 w-8 bg-accent" />
+      <div className="mt-3 text-[0.625rem] font-bold tracking-wider text-muted-text uppercase">CalBudge · Client nutrition report</div>
+      <div className="mt-2 text-xl font-bold text-ink">{sample.name}</div>
+      <div className="text-xs text-muted-text">{goalLabel(sample)}</div>
+      <div className="mt-4 text-[0.625rem] font-bold tracking-wider text-muted-text uppercase">Daily calorie target</div>
+      <div className="text-3xl font-bold text-ink tabular-nums">{sample.targetKcal.toLocaleString('en-US')} kcal</div>
+      <div className="mt-1 text-xs text-muted-text tabular-nums">Maintenance (TDEE): {sample.tdeeKcal.toLocaleString('en-US')} kcal</div>
+      {sample.macros && (
+        <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3 text-xs tabular-nums">
+          <div><dt className="text-muted-text">Protein</dt><dd className="font-bold text-ink">{sample.macros.proteinG} g</dd></div>
+          <div><dt className="text-muted-text">Carbs</dt><dd className="font-bold text-ink">{sample.macros.carbsG} g</dd></div>
+          <div><dt className="text-muted-text">Fat</dt><dd className="font-bold text-ink">{sample.macros.fatG} g</dd></div>
+        </dl>
+      )}
+      <ul className="mt-3 border-t border-line pt-2 text-xs tabular-nums">
+        {sample.meals.map(m => (
+          <li key={m.name} className="flex justify-between py-0.5">
+            <span className="text-muted-text">{m.name}</span>
+            <span className="font-bold text-ink">{m.kcal}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

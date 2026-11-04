@@ -1,10 +1,12 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/bricolage-grotesque";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans: 'Inter Variable', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
   /* Formal navy/gold palette. Every color used anywhere in the app is a
      token here — components reference these, never a raw hex — so the
      whole scheme can be re-tuned from this one block. */
@@ -18,6 +20,12 @@
   --color-ink-hover: #344466;
   --color-disabled: #A9AFBC;
   --color-focus-bg: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-ink-deep: #131E36;
+  --color-ink-raised: #24355A;
+  --color-line-onink: #3A4D75;
+  --color-accent-hover: #D8B23A;
+  --color-gold-ink: #7E6410; /* gold dark enough for text on paper (AA) */
 }
 
 @theme inline {
@@ -88,7 +96,68 @@
   animation: block-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+/* Faint ruled lines behind navy sections: the ledger, not a glow. */
+.ledger-lines {
+  position: relative;
+  isolation: isolate;
+}
+.ledger-lines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 100% 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+/* Scroll reveal: the class is only ever added by JS (hooks/useReveal.ts). */
+[data-reveal] {
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal].reveal-pending {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hero slider: gold up to the thumb (--pct is set inline), pale after it. */
+.range-gold {
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-accent) var(--pct), var(--color-hover-tint) var(--pct));
+}
+.range-gold::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(27 42 74 / 0.45);
+}
+.range-gold::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgb(27 42 74 / 0.45);
+}
+.range-gold:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 6px;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   * {
     animation-duration: 0.001ms !important;
     animation-delay: 0ms !important;

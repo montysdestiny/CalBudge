@@ -10,7 +10,6 @@ import {
   STAGGER_MS,
   SummaryRow,
   ToggleGroup,
-  staggerDelay,
 } from '@/components/Blocks';
 import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
@@ -18,9 +17,9 @@ import BulkEstimator from '@/components/BulkEstimator';
 import CookieBanner from '@/components/CookieBanner';
 import HomeContent from '@/components/HomeContent';
 import PrivacyPolicy from '@/components/PrivacyPolicy';
-import RichText from '@/components/RichText';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
 import { useOdometer } from '@/hooks/useOdometer';
+import { useReveal } from '@/hooks/useReveal';
 import { EXTERNAL_APPS, copyTargetsForApp } from '@/lib/appExport';
 import {
   BOUNDS,
@@ -39,7 +38,7 @@ import {
   redistributeMealSplit,
 } from '@/lib/calc';
 import { readConsent, track } from '@/lib/consent';
-import type { LandingPage } from '@/lib/pages';
+import { type LandingPage, PAGES } from '@/lib/pages';
 import { decodePlan, encodePlan } from '@/lib/share';
 
 type StepId =
@@ -60,6 +59,17 @@ interface HistoryEntry {
 }
 
 const STEP_ORDER: StepId[] = ['entry', 'tdee-input', 'basics', 'optional', 'goal', 'pace', 'goal-estimate'];
+
+const STEP_TOTAL = 6;
+const PROGRESS: Partial<Record<StepId, { step: number; label: string }>> = {
+  entry: { step: 1, label: 'Getting started' },
+  'tdee-input': { step: 2, label: 'Your TDEE' },
+  basics: { step: 2, label: 'About you' },
+  optional: { step: 3, label: 'Optional details' },
+  goal: { step: 4, label: 'Your goal' },
+  pace: { step: 5, label: 'Your pace' },
+  'goal-estimate': { step: 6, label: 'Target weight' },
+};
 
 const INITIAL_STATE: WizardState = {
   unitSystem: 'metric',
@@ -144,12 +154,30 @@ export default function App({ page }: { page: LandingPage }) {
     goTo('entry');
   }
 
-  const blockDelay = staggerDelay(history.length);
+  useReveal(stepId);
+  // The wizard replaces the long landing page, so start each screen at the top.
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [stepId]);
+
+  function start() {
+    track('calculator_start', { source: page.path });
+    goTo('entry');
+  }
+
+  const inWizard = !standalone && stepId !== 'welcome';
+  const isResult = stepId === 'result';
+  const progress = PROGRESS[stepId];
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-40 border-b border-line-onink/60 bg-ink text-paper">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-3.5">
           <button
             type="button"
             onClick={() => {
@@ -160,63 +188,91 @@ export default function App({ page }: { page: LandingPage }) {
               restart();
               goTo('welcome');
             }}
-            className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-ink"
+            className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-paper"
             aria-label="CalBudge home"
           >
             <LogoMark />
-            <span className="text-lg font-bold tracking-tight">CalBudge</span>
+            <span className="font-display text-xl font-bold tracking-tight">CalBudge</span>
           </button>
-          {stepId === 'welcome' && (
-            <nav aria-label="Page sections" className="hidden items-center gap-6 text-sm font-medium text-muted-text sm:flex">
+          {!inWizard && (
+            <nav aria-label="Page sections" className="hidden items-center gap-7 text-sm font-medium text-onink-text md:flex">
               {isBulk ? (
-                <a href="/" className="hover:text-ink">Single calculator</a>
+                <a href="/" className="hover:text-paper">Single calculator</a>
               ) : isPrivacy ? (
                 <>
-                  <a href="/" className="hover:text-ink">Calculator</a>
-                  <a href="/coaches" className="hover:text-ink">For coaches</a>
+                  <a href="/" className="hover:text-paper">Calculator</a>
+                  <a href="/coaches" className="hover:text-paper">For coaches</a>
                 </>
               ) : (
                 <>
-                  <a href="#how-it-works" className="hover:text-ink">How it works</a>
+                  <a href="#how-it-works" className="hover:text-paper">How it works</a>
                   {/* The full method lives on the homepage; landing pages link to it. */}
-                  <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-ink">The maths</a>
-                  <a href="#faq" className="hover:text-ink">FAQ</a>
-                  <a href="/coaches" className="hover:text-ink">For coaches</a>
+                  <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-paper">The maths</a>
+                  <a href="#faq" className="hover:text-paper">FAQ</a>
+                  <a href="/coaches" className="hover:text-paper">For coaches</a>
                 </>
               )}
             </nav>
           )}
           {/* On the coaches page, units come from the CSV's column names. */}
-          {!standalone && (
+          {inWizard ? (
             <UnitSwitch
               imperial={imperial}
               onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
             />
+          ) : isBulk ? (
+            <a href="#upload" className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+              Upload clients
+            </a>
+          ) : isPrivacy ? (
+            <a href="/" className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+              Open calculator
+            </a>
+          ) : (
+            <button type="button" onClick={start} className="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+              Get my number
+            </button>
           )}
         </div>
+        {!inWizard && <ScrollProgress key={stepId} />}
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className={`w-full ${isBulk ? 'max-w-3xl' : stepId === 'welcome' || isPrivacy ? 'max-w-[640px]' : 'max-w-[560px]'}`}>
-          {isBulk ? (
-            <BulkEstimator page={page} />
-          ) : isPrivacy ? (
-            <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
-          ) : stepId === 'welcome' ? (
-            <Welcome
-              page={page}
-              onStart={() => {
-                track('calculator_start', { source: page.path });
-                goTo('entry');
-              }}
-            />
-          ) : (
-            <>
-              {history.map((h, idx) => (
-                <SummaryRow key={`${h.editStepId}-${h.label}`} label={h.label} value={h.value} index={idx} onEdit={() => editStep(h.editStepId)} />
-              ))}
-
-              <Block className="mt-1 p-6" style={blockDelay}>
+      <main className="flex-1">
+        {isBulk ? (
+          <BulkEstimator page={page} />
+        ) : isPrivacy ? (
+          <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
+        ) : stepId === 'welcome' ? (
+          <HomeContent page={page} onStart={start} />
+        ) : isResult ? (
+          <div className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
+            {history.length > 0 && (
+              <details className="mb-6 rounded-2xl border border-line bg-card px-5 py-3">
+                <summary className="cursor-pointer text-sm font-bold text-ink">Your answers ({history.length})</summary>
+                <div className="mt-2">
+                  {history.map(h => (
+                    <SummaryRow key={`${h.editStepId}-${h.label}`} label={h.label} value={h.value} onEdit={() => editStep(h.editStepId)} />
+                  ))}
+                </div>
+              </details>
+            )}
+            <StepResult state={state} historyLength={history.length} shared={sharedView} onRestart={restart} />
+          </div>
+        ) : (
+          <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
+            {progress && (
+              <div className="mb-8">
+                <div className="flex items-baseline justify-between text-sm font-medium text-muted-text">
+                  <span className="font-bold text-ink">{progress.label}</span>
+                  <span className="tabular-nums">Step {progress.step} of {STEP_TOTAL}</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-hover-tint" aria-hidden="true">
+                  <div className="h-full rounded-full bg-accent transition-[width] duration-300" style={{ width: `${(progress.step / STEP_TOTAL) * 100}%` }} />
+                </div>
+              </div>
+            )}
+            <div className={history.length > 0 ? 'grid items-start gap-6 lg:grid-cols-[1fr_300px]' : 'mx-auto max-w-2xl'}>
+              <Block className="p-6 sm:p-8" key={stepId}>
           {stepId === 'entry' && (
             <StepEntry
               onYes={() => {
@@ -333,33 +389,59 @@ export default function App({ page }: { page: LandingPage }) {
               }}
             />
           )}
-
-
-          {stepId === 'result' && <StepResult state={state} historyLength={history.length} shared={sharedView} onRestart={restart} />}
               </Block>
-            </>
-          )}
-        </div>
+              {history.length > 0 && (
+                <aside aria-label="Your answers" className="order-first rounded-2xl border border-line bg-card px-5 py-4 lg:sticky lg:top-24 lg:order-none">
+                  <div className="pb-1 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Your answers</div>
+                  {history.map(h => (
+                    <SummaryRow key={`${h.editStepId}-${h.label}`} label={h.label} value={h.value} onEdit={() => editStep(h.editStepId)} />
+                  ))}
+                </aside>
+              )}
+            </div>
+          </div>
+        )}
       </main>
 
-      <footer className="border-t border-line bg-paper">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-6 text-xs text-hint-text sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-medium text-muted-text">© {new Date().getFullYear()} CalBudge · Free calorie budget calculator</span>
-          <span>
-            Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
-            changing your diet.{' '}
-            <a href="/privacy" className="text-hint-text underline hover:text-ink">
-              Privacy policy
-            </a>
-            {' · '}
-            <button
-              type="button"
-              onClick={() => setCookieBannerOpen(true)}
-              className="cursor-pointer border-none bg-transparent p-0 text-xs text-hint-text underline hover:text-ink"
-            >
-              Cookie settings
-            </button>
-          </span>
+      <footer className="bg-ink-deep text-onink-text">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.6fr_1fr_1fr]">
+          <div>
+            <div className="flex items-center gap-2.5 text-paper">
+              <LogoMark />
+              <span className="font-display text-xl font-bold tracking-tight">CalBudge</span>
+            </div>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed">
+              Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
+              changing your diet.
+            </p>
+          </div>
+          <nav aria-label="Calculators">
+            <div className="text-sm font-bold text-paper">Calculators</div>
+            <ul className="mt-3 space-y-2 text-sm">
+              {PAGES.filter(p => p.kind !== 'privacy').map(p => (
+                <li key={p.path}>
+                  <a href={p.path} className="hover:text-paper">{p.linkLabel}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div>
+            <div className="text-sm font-bold text-paper">About your data</div>
+            <p className="mt-3 text-sm leading-relaxed">Your answers and client files stay in your browser. Nothing is uploaded or stored.</p>
+            <div className="mt-3 flex flex-col items-start gap-2 text-sm">
+              <a href="/privacy" className="underline underline-offset-2 hover:text-paper">Privacy policy</a>
+              <button
+                type="button"
+                onClick={() => setCookieBannerOpen(true)}
+                className="cursor-pointer border-none bg-transparent p-0 text-sm text-onink-text underline underline-offset-2 hover:text-paper"
+              >
+                Cookie settings
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-line-onink/50">
+          <div className="mx-auto w-full max-w-6xl px-6 py-5 text-xs">© {new Date().getFullYear()} CalBudge</div>
         </div>
       </footer>
       {cookieBannerOpen && <CookieBanner onClose={() => setCookieBannerOpen(false)} />}
@@ -372,7 +454,7 @@ export default function App({ page }: { page: LandingPage }) {
 function LogoMark() {
   return (
     <svg viewBox="0 0 48 48" className="h-8 w-8" aria-hidden="true">
-      <rect width="48" height="48" rx="10" fill="var(--color-ink)" />
+      <rect width="48" height="48" rx="10" fill="var(--color-ink-deep)" />
       <circle cx="24" cy="24" r="14" fill="none" stroke="#3a4d75" strokeWidth="6" />
       <circle
         cx="24"
@@ -395,7 +477,7 @@ function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (impe
     { label: 'lb / in', value: true },
   ];
   return (
-    <div role="group" aria-label="Units" className="flex rounded-lg border border-line bg-paper p-0.5 text-[0.8125rem] font-medium">
+    <div role="group" aria-label="Units" className="flex rounded-lg border border-line-onink p-0.5 text-[0.8125rem] font-medium">
       {options.map(opt => {
         const selected = imperial === opt.value;
         return (
@@ -406,7 +488,7 @@ function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (impe
             onClick={() => onChange(opt.value)}
             className={
               'cursor-pointer rounded-md border-none px-3 py-1.5 transition-colors duration-150 ' +
-              (selected ? 'bg-ink text-paper' : 'bg-transparent text-muted-text hover:text-ink')
+              (selected ? 'bg-paper text-ink' : 'bg-transparent text-onink-text hover:text-paper')
             }
           >
             {opt.label}
@@ -417,47 +499,29 @@ function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (impe
   );
 }
 
-// ---- Welcome ----
-
-const FEATURES = [
-  { title: 'BMR & TDEE', body: 'Worked out from your age, size and training, or enter your own.' },
-  { title: 'Meal-by-meal split', body: 'Your daily target divided across meals, snacks and workout fuel.' },
-  { title: 'Macro estimate', body: 'Protein, carbs and fat based on your bodyweight.' },
-];
-
-function Welcome({ page, onStart }: { page: LandingPage; onStart: () => void }) {
-  return (
-    <section className="animate-block-in">
-      <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">{page.h1}</h1>
-      <p className="mt-4 text-lg text-muted-text">{page.intro}</p>
-      <Button className="mt-8" onClick={onStart}>
-        {page.cta}
-      </Button>
-      <ul className="mt-12 grid gap-6 border-t border-line pt-6 sm:grid-cols-3">
-        {FEATURES.map(f => (
-          <li key={f.title}>
-            <div className="text-sm font-bold text-ink">{f.title}</div>
-            <p className="mt-1 text-sm text-muted-text">{f.body}</p>
-          </li>
-        ))}
-      </ul>
-      {page.sections.length > 0 && (
-        <div className="mt-20 space-y-10">
-          {page.sections.map(sec => (
-            <section key={sec.heading}>
-              <h2 className="text-2xl font-bold tracking-tight text-ink">{sec.heading}</h2>
-              {sec.paragraphs.map(para => (
-                <p key={para.slice(0, 40)} className="mt-3 text-[0.9375rem] leading-relaxed text-muted-text">
-                  <RichText text={para} />
-                </p>
-              ))}
-            </section>
-          ))}
-        </div>
-      )}
-      <HomeContent page={page} onStart={onStart} />
-    </section>
-  );
+/** Thin gold bar under the header showing how far down the page you are. */
+function ScrollProgress() {
+  const bar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (bar.current) bar.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+  return <div ref={bar} aria-hidden="true" className="absolute inset-x-0 -bottom-px h-0.5 origin-left bg-accent" style={{ transform: 'scaleX(0)' }} />;
 }
 
 // ---- Step: entry ----
@@ -465,8 +529,8 @@ function Welcome({ page, onStart }: { page: LandingPage; onStart: () => void }) 
 function StepEntry({ onYes, onNo }: { onYes: () => void; onNo: () => void }) {
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Have you already calculated your daily expenditure (TDEE)?</h2>
-      <div className="mt-2 flex items-center gap-3">
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">Have you already calculated your daily expenditure (TDEE)?</h2>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         <Button onClick={onYes}>Yes, I know my TDEE</Button>
         <Button variant="outline" onClick={onNo}>No, calculate it</Button>
       </div>
@@ -486,7 +550,7 @@ function StepTdeeInput({ imperial, onContinue }: { imperial: boolean; onContinue
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">What's your daily expenditure?</h2>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">What's your daily expenditure?</h2>
       <Field label="TDEE (kcal/day)">
         <NumberInput min={BOUNDS.tdee.min} max={BOUNDS.tdee.max} step={10} value={val} onChange={e => setVal(e.target.value)} />
         <ErrorText>{error}</ErrorText>
@@ -577,9 +641,10 @@ function StepBasics({
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Tell us about you</h2>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">Tell us about you</h2>
       <ToggleGroup label="Sex" value={sex} onChange={setSex} options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }]} />
       <ErrorText>{errors.sex}</ErrorText>
+      <div className="grid gap-x-4 sm:grid-cols-2">
       <Field label="Age (years)">
         <NumberInput min={BOUNDS.age.min} max={BOUNDS.age.max} value={age} onChange={e => setAge(e.target.value)} />
         <ErrorText>{errors.age}</ErrorText>
@@ -600,6 +665,7 @@ function StepBasics({
         <NumberInput min={BOUNDS.sessionsPerWeek.min} max={BOUNDS.sessionsPerWeek.max} value={cardio} onChange={e => setCardio(e.target.value)} />
         <ErrorText>{errors.cardio}</ErrorText>
       </Field>
+      </div>
       <Button onClick={submit}>Continue</Button>
     </>
   );
@@ -617,8 +683,8 @@ function StepOptional({ onContinue }: { onContinue: (vals: OptionalValues) => vo
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">A few optional details</h2>
-      <p className="mb-4 text-xs text-hint-text">Each one makes your number more accurate. Skip any you don't know and we'll use standard defaults.</p>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">A few optional details</h2>
+      <p className="mb-5 text-sm text-muted-text">Each one makes your number more accurate. Skip any you don't know and we'll use standard defaults.</p>
       <Field label="Average daily steps" hint="Refines your activity multiplier.">
         <NumberInput min={BOUNDS.steps.min} max={BOUNDS.steps.max} value={steps} onChange={e => setSteps(e.target.value)} />
         <ErrorText>{errors.steps}</ErrorText>
@@ -672,7 +738,7 @@ function StepGoal({ preset, onContinue }: { preset?: Goal; onContinue: (goal: Go
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Are you cutting, bulking, or maintaining?</h2>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">Are you cutting, bulking, or maintaining?</h2>
       <ToggleGroup
         label="Goal"
         value={goal}
@@ -704,7 +770,7 @@ function StepPace({ onContinue }: { onContinue: (pace: Pace) => void }) {
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Choose your pace</h2>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">Choose your pace</h2>
       <ToggleGroup
         label="Pace"
         value={pace}
@@ -738,8 +804,8 @@ function StepGoalEstimate({ imperial, onDone }: { imperial: boolean; onDone: (ta
 
   return (
     <>
-      <h2 className="mb-4 text-lg font-bold">Got a target weight?</h2>
-      <p className="mb-4 text-xs text-hint-text">We'll estimate roughly how long it could take. Optional.</p>
+      <h2 className="mb-5 font-display text-2xl leading-tight font-bold tracking-tight text-balance sm:text-3xl">Got a target weight?</h2>
+      <p className="mb-5 text-sm text-muted-text">We'll estimate roughly how long it could take. Optional.</p>
       <Field label={`Target weight (${weightUnit})`}>
         <NumberInput min={weightBounds.min} max={weightBounds.max} value={val} onChange={e => setVal(e.target.value)} />
         <ErrorText>{error}</ErrorText>
@@ -886,7 +952,7 @@ function StepResult({
   if (showExportApps) {
     return (
       <>
-        <div className="mb-2 text-[0.8125rem] font-bold tracking-wide text-muted-text uppercase">Export to other app</div>
+        <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Export to other app</div>
         <Block className="p-6">
           <p className="mb-5 text-[0.9375rem] text-muted-text">
             Copy your targets in a format ready to paste into another tracker's custom goals screen.
@@ -934,65 +1000,71 @@ function StepResult({
           </Block>
         )}
 
-        <div className="mt-1">
-          <div className="mb-2 text-[0.8125rem] font-bold tracking-wide text-muted-text uppercase">Today's budget</div>
-          <Block
-            className="mb-2 flex items-baseline justify-between bg-ink p-6 text-paper"
-            style={{ animationDelay: `${totalDelay}ms` }}
-          >
-            <span className="text-[2.75rem] font-bold tabular-nums">{odometerValue.toLocaleString()}</span>
-            <span className="text-sm font-medium text-onink-text">kcal target</span>
-          </Block>
-          <div className="mb-2 flex flex-wrap justify-between gap-x-4 px-1 text-sm text-muted-text tabular-nums">
-            <span>
-              Maintenance (TDEE): <span className="font-bold text-ink">{tdeeRounded.toLocaleString()} kcal</span>
-            </span>
-            {bmrRounded != null && (
-              <span>
-                BMR: <span className="font-bold text-ink">{bmrRounded.toLocaleString()} kcal</span>
-              </span>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {rows.map((r, i) => {
-              const isExcluded = excludedMeals.has(r.name);
-              const displayKcal = kcalByName.get(r.name) ?? 0;
-              return (
-                <div key={r.name} className="animate-block-in" style={{ animationDelay: `${rowDelays[i]}ms` }}>
-                  <MealFlipCard
-                    name={r.name}
-                    kcal={isExcluded ? r.kcal : displayKcal}
-                    percentOfTotal={isExcluded ? 0 : Math.round((displayKcal / X) * 100)}
-                    excluded={isExcluded}
-                    onToggleExclude={() => toggleExclude(r.name)}
-                  />
+        <div className="ledger-lines animate-block-in overflow-hidden rounded-2xl bg-ink p-7 text-paper sm:p-9" style={{ animationDelay: `${totalDelay}ms` }}>
+          <div className="relative flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <div className="text-[0.8125rem] font-bold tracking-[0.12em] text-accent uppercase">Today's budget</div>
+              <div className="mt-2 flex items-baseline gap-3">
+                <span className="font-display text-6xl font-bold tracking-tight tabular-nums sm:text-7xl">{odometerValue.toLocaleString()}</span>
+                <span className="text-base font-medium text-onink-text">kcal target</span>
+              </div>
+            </div>
+            <dl className="flex gap-8 text-sm tabular-nums">
+              <div>
+                <dt className="text-onink-text">Maintenance (TDEE)</dt>
+                <dd className="mt-0.5 text-lg font-bold">{tdeeRounded.toLocaleString()} kcal</dd>
+              </div>
+              {bmrRounded != null && (
+                <div>
+                  <dt className="text-onink-text">BMR</dt>
+                  <dd className="mt-0.5 text-lg font-bold">{bmrRounded.toLocaleString()} kcal</dd>
                 </div>
-              );
-            })}
+              )}
+            </dl>
           </div>
         </div>
 
-        {macros && (
-          <div className="mt-4">
-            <div className="mb-2 text-[0.8125rem] font-bold tracking-wide text-muted-text uppercase">Macros (estimated)</div>
-            <Block className="px-6 py-6" style={{ animationDelay: `${macrosDelay}ms` }}>
-              <BudgetRings rings={macroRings} className="justify-center" />
-              <p className="mt-4 text-xs text-hint-text">
-                Estimated from your bodyweight: protein at 1.8g/kg, fat at 25% of your target, carbs make up the rest. Not a prescribed plan.
-              </p>
+        <div className="mt-8 mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Meal by meal</div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {rows.map((r, i) => {
+            const isExcluded = excludedMeals.has(r.name);
+            const displayKcal = kcalByName.get(r.name) ?? 0;
+            return (
+              <div key={r.name} className="animate-block-in" style={{ animationDelay: `${rowDelays[i]}ms` }}>
+                <MealFlipCard
+                  name={r.name}
+                  kcal={isExcluded ? r.kcal : displayKcal}
+                  percentOfTotal={isExcluded ? 0 : Math.round((displayKcal / X) * 100)}
+                  excluded={isExcluded}
+                  onToggleExclude={() => toggleExclude(r.name)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div className={macros ? 'mt-8 grid grid-cols-1 gap-4 md:grid-cols-2' : 'mt-8'}>
+          {macros && (
+            <div className="flex min-w-0 flex-col">
+              <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Macros (estimated)</div>
+              <Block className="flex-1 p-4 sm:p-6" style={{ animationDelay: `${macrosDelay}ms` }}>
+                <BudgetRings rings={macroRings} className="justify-center" />
+                <p className="mt-4 text-xs text-hint-text">
+                  Estimated from your bodyweight: protein at 1.8g/kg, fat at 25% of your target, carbs make up the rest. Not a prescribed plan.
+                </p>
+              </Block>
+            </div>
+          )}
+          <div className="flex min-w-0 flex-col">
+            <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Composition</div>
+            <Block className="flex-1 p-4 sm:p-6" style={{ animationDelay: `${ringsDelay}ms` }}>
+              <BudgetRings rings={rings} className="justify-center" />
             </Block>
           </div>
-        )}
-
-        <div className="mt-4">
-          <div className="mb-2 text-[0.8125rem] font-bold tracking-wide text-muted-text uppercase">Composition</div>
-          <Block className="px-6 py-6" style={{ animationDelay: `${ringsDelay}ms` }}>
-            <BudgetRings rings={rings} className="justify-center" />
-          </Block>
         </div>
 
         {weeks != null && weeks > 0 && (
-          <Block className="mt-4 border-line px-[18px] py-4 text-[0.875rem] text-muted-text" style={{ animationDelay: `${estimateDelay}ms` }}>
+          <Block className="mt-4 px-6 py-5 text-[0.9375rem] text-muted-text" style={{ animationDelay: `${estimateDelay}ms` }}>
             At this pace, reaching your target weight is an estimated{' '}
             <span className="font-bold text-ink">{Math.round(weeks)} week{Math.round(weeks) === 1 ? '' : 's'}</span> away.
             <div className="mt-2 text-xs text-hint-text">
