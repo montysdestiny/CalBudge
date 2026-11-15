@@ -1,7 +1,7 @@
 // Runs after the client and SSR builds. For every landing page in
 // src/lib/pages.ts: server-render the app, fill in that page's
 // title/description/canonical/social tags and breadcrumbs, and write it to
-// dist/<path>.html. Also generates dist/sitemap.xml.
+// dist/<path>.html. Also generates dist/sitemap.xml and dist/llms.txt.
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -23,6 +23,11 @@ for (const page of PAGES.filter(p => p.path !== '/')) {
 const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8')
 const marker = '<div id="root"></div>'
 if (!template.includes(marker)) throw new Error(`prerender: ${marker} not found in dist/index.html`)
+
+// FAQ answers and guide copy use [label](/path) links; plain text for schema.
+const plain = s => s.replace(/\[([^\]]+)\]\((\/[^)\s]*)\)/g, '$1')
+const abs = p => (p === '/' ? `${SITE_URL}/` : `${SITE_URL}${p}`)
+const ldScript = obj => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
 
 const escapeAttr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -51,40 +56,106 @@ for (const page of PAGES) {
   // Images come from scripts/og-images.mjs (run locally, committed to public/og/).
   const image = `${SITE_URL}/og/${page.path === '/' ? 'home' : page.path.slice(1)}.png`
   if (!fs.existsSync(path.join(root, 'public', new URL(image).pathname))) {
-    throw new Error(`prerender: missing ${new URL(image).pathname}; run node scripts/og-images.mjs`)
+    throw new Error(`prerender: missing ${new URL(image).pathname}; run node --import ./tests/register.mjs scripts/og-images.mjs`)
   }
   html = setTag(html, /(<meta property="og:image" content=")[^"]*(")/, image)
   html = setTag(html, /(<meta name="twitter:image" content=")[^"]*(")/, image)
-  // The policy page isn't an application: describe it as a plain web page.
-  if (page.kind === 'privacy') {
-    const webPage = { '@context': 'https://schema.org', '@type': 'WebPage', name: page.h1, url, description: page.description }
-    html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => `<script type="application/ld+json">${JSON.stringify(webPage)}</script>`)
+  // Only the calculators are applications: the policy and the guide list are
+  // plain web pages, and each guide is an article.
+  const replaceMainLd = obj => {
+    html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => ldScript(obj))
   }
+  if (page.kind === 'privacy' || page.kind === 'guides') {
+    replaceMainLd({ '@context': 'https://schema.org', '@type': page.kind === 'guides' ? 'CollectionPage' : 'WebPage', name: page.h1, url, description: page.description })
+  }
+  if (page.kind === 'article') {
+    const a = page.article
+    const org = { '@type': 'Organization', name: 'CalBudge', url: `${SITE_URL}/` }
+    replaceMainLd({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: a.h1,
+      description: page.description,
+      abstract: a.shortAnswer,
+      url,
+      mainEntityOfPage: url,
+      image,
+      datePublished: a.published,
+      dateModified: a.updated ?? a.published,
+      author: org,
+      publisher: org,
+      inLanguage: 'en',
+    })
+    html = setTag(html, /(<meta property="og:type" content=")[^"]*(")/, 'article')
+  }
+  const extraLd = []
   if (page.path !== '/') {
-    const breadcrumbs = {
+    const trail = [{ name: 'CalBudge', path: '/' }]
+    if (page.kind === 'article') trail.push({ name: 'Guides', path: '/guides' })
+    trail.push({ name: page.linkLabel, path: page.path })
+    extraLd.push({
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'CalBudge', item: `${SITE_URL}/` },
-        { '@type': 'ListItem', position: 2, name: page.linkLabel, item: url },
-      ],
-    }
-    html = html.replace('</head>', `  <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>
-  </head>`)
+      itemListElement: trail.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.name, item: abs(t.path) })),
+    })
   }
+  if (page.faqs?.length) {
+    extraLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: page.faqs.map(f => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: plain(f.a) } })),
+    })
+  }
+  if (extraLd.length) html = html.replace('</head>', `${extraLd.map(o => `  ${ldScript(o)}\n`).join('')}  </head>`)
   html = html.replace(marker, `<div id="root">${render(page.path)}</div>`)
 
   // dist/tdee-calculator.html is served at /tdee-calculator via a rewrite in vercel.json.
   const outFile = page.path === '/' ? path.join(dist, 'index.html') : path.join(dist, `${page.path.slice(1)}.html`)
+  fs.mkdirSync(path.dirname(outFile), { recursive: true })
   fs.writeFileSync(outFile, html)
 }
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${PAGES.map(p => `  <url>\n    <loc>${p.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${p.path}`}</loc>\n  </url>`).join('\n')}
+${PAGES.map(p => {
+  const lastmod = p.article ? `\n    <lastmod>${p.article.updated ?? p.article.published}</lastmod>` : ''
+  return `  <url>\n    <loc>${abs(p.path)}</loc>${lastmod}\n  </url>`
+}).join('\n')}
 </urlset>
 `
 fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap)
 
+// llms.txt (llmstxt.org): a plain summary of the site for AI assistants and
+// their crawlers. Built from PAGES so it never goes stale; the method section
+// mirrors src/lib/calc.ts.
+const calculators = PAGES.filter(p => !p.kind || p.kind === 'calculator' || p.kind === 'bulk')
+const guides = PAGES.filter(p => p.kind === 'article')
+const llms = `# CalBudge
+
+> CalBudge is a free calorie and macro calculator at ${SITE_URL}. It works out your BMR, TDEE (maintenance calories) and a daily calorie target for losing, maintaining or gaining weight, then splits that target meal by meal (breakfast, lunch, dinner, snack, pre- and post-workout) with protein, carb and fat targets. No account or signup, and answers are processed in the browser. A separate free bulk tool lets coaches and personal trainers upload a spreadsheet of clients and download a PDF report with targets for each.
+
+## Calculators
+
+${calculators.map(p => `- [${p.linkLabel}](${abs(p.path)}): ${p.description}`).join('\n')}
+
+## Guides
+
+${guides.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join('\n')}
+
+## Method
+
+- BMR: Mifflin-St Jeor (10 × weight kg + 6.25 × height cm − 5 × age, +5 for men, −161 for women), or Katch-McArdle (370 + 21.6 × lean mass kg) when body fat percentage is given, or a BMR the user already knows.
+- TDEE: BMR × an activity factor from 1.2 to 1.9, set from gym and cardio sessions per week (cardio counts as 0.75 of a gym session) and fine-tuned by average daily steps.
+- Goal: weight loss at 10%, 20% or 27.5% below TDEE; weight gain at 10%, 20% or 25% above. A weight-loss target never goes below 1.2 × BMR or 1,200 kcal a day.
+- Macros: protein 1.8 g per kg of bodyweight, fat 25% of calories, carbohydrates the rest.
+- Meals: breakfast about 18%, lunch 25%, dinner 25%, and about 11% each for a snack, pre-workout and post-workout meal. Removing a meal moves its calories to the others in proportion.
+- Export: targets can be copied into MyFitnessPal, MacroFactor or Cal AI, or saved as an image or PDF.
+
+## Optional
+
+- [Privacy policy](${abs('/privacy')}): calculator answers and coaches' client files are processed in the browser and never uploaded or stored.
+`
+fs.writeFileSync(path.join(dist, 'llms.txt'), llms)
+
 fs.rmSync(path.join(root, 'dist-ssr'), { recursive: true, force: true })
-console.log(`prerender: wrote ${PAGES.length} pages and sitemap.xml`)
+console.log(`prerender: wrote ${PAGES.length} pages, sitemap.xml and llms.txt`)

@@ -15,6 +15,7 @@ import BudgetRings from '@/components/kokonutui/budget-rings';
 import ExportAppCard from '@/components/kokonutui/export-app-card';
 import BulkEstimator from '@/components/BulkEstimator';
 import CookieBanner from '@/components/CookieBanner';
+import { ArticlePage, GuidesIndex } from '@/components/Article';
 import HomeContent from '@/components/HomeContent';
 import PrivacyPolicy from '@/components/PrivacyPolicy';
 import MealFlipCard from '@/components/kokonutui/meal-flip-card';
@@ -38,7 +39,8 @@ import {
   redistributeMealSplit,
 } from '@/lib/calc';
 import { readConsent, track } from '@/lib/consent';
-import { type LandingPage, PAGES } from '@/lib/pages';
+import { ARTICLES, articlePath } from '@/lib/articles';
+import { type LandingPage, PAGES, isCalculatorPage } from '@/lib/pages';
 import { decodePlan, encodePlan } from '@/lib/share';
 
 type StepId =
@@ -121,8 +123,9 @@ export default function App({ page }: { page: LandingPage }) {
   const imperial = state.unitSystem === 'imperial';
   const isBulk = page.kind === 'bulk';
   const isPrivacy = page.kind === 'privacy';
+  const isGuide = page.kind === 'article' || page.kind === 'guides';
   // Pages without the single-person wizard: the logo just goes home.
-  const standalone = isBulk || isPrivacy;
+  const standalone = isBulk || isPrivacy || isGuide;
 
   function pushSummary(label: string, value: string, editStepId: StepId) {
     setHistory(h => [...h.filter(e => !(e.editStepId === editStepId && e.label === label)), { label, value, editStepId }]);
@@ -198,9 +201,10 @@ export default function App({ page }: { page: LandingPage }) {
             <nav aria-label="Page sections" className="hidden items-center gap-7 text-sm text-muted-text md:flex">
               {isBulk ? (
                 <a href="/" className="hover:text-ink">Single calculator</a>
-              ) : isPrivacy ? (
+              ) : isPrivacy || isGuide ? (
                 <>
                   <a href="/" className="hover:text-ink">Calculator</a>
+                  <a href="/guides" className="hover:text-ink">Guides</a>
                   <a href="/coaches" className="hover:text-ink">For coaches</a>
                 </>
               ) : (
@@ -209,6 +213,7 @@ export default function App({ page }: { page: LandingPage }) {
                   {/* The full method lives on the homepage; landing pages link to it. */}
                   <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-ink">The maths</a>
                   <a href="#faq" className="hover:text-ink">FAQ</a>
+                  <a href="/guides" className="hover:text-ink">Guides</a>
                   <a href="/coaches" className="hover:text-ink">For coaches</a>
                 </>
               )}
@@ -224,8 +229,8 @@ export default function App({ page }: { page: LandingPage }) {
             <a href="#upload" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
               Upload clients
             </a>
-          ) : isPrivacy ? (
-            <a href="/" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
+          ) : isPrivacy || isGuide ? (
+            <a href={page.article?.calculator.path ?? '/'} className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
               Open calculator
             </a>
           ) : (
@@ -242,6 +247,10 @@ export default function App({ page }: { page: LandingPage }) {
           <BulkEstimator page={page} />
         ) : isPrivacy ? (
           <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
+        ) : page.kind === 'article' ? (
+          <ArticlePage page={page} />
+        ) : page.kind === 'guides' ? (
+          <GuidesIndex page={page} />
         ) : stepId === 'welcome' ? (
           <HomeContent page={page} onStart={start} />
         ) : isResult ? (
@@ -404,7 +413,7 @@ export default function App({ page }: { page: LandingPage }) {
       </main>
 
       <footer className="border-t border-line bg-paper text-muted-text">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.6fr_1fr_1fr]">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2.5 text-ink">
               <LogoMark />
@@ -418,11 +427,24 @@ export default function App({ page }: { page: LandingPage }) {
           <nav aria-label="Calculators">
             <div className="text-sm font-medium text-ink">Calculators</div>
             <ul className="mt-3 space-y-2 text-sm">
-              {PAGES.filter(p => p.kind !== 'privacy').map(p => (
+              {PAGES.filter(isCalculatorPage).map(p => (
                 <li key={p.path}>
                   <a href={p.path} className="hover:text-ink">{p.linkLabel}</a>
                 </li>
               ))}
+            </ul>
+          </nav>
+          <nav aria-label="Guides">
+            <div className="text-sm font-medium text-ink">Guides</div>
+            <ul className="mt-3 space-y-2 text-sm">
+              {ARTICLES.map(a => (
+                <li key={a.slug}>
+                  <a href={articlePath(a.slug)} className="hover:text-ink">{a.linkLabel}</a>
+                </li>
+              ))}
+              <li>
+                <a href="/guides" className="font-medium hover:text-ink">All guides</a>
+              </li>
             </ul>
           </nav>
           <div>

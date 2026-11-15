@@ -3,6 +3,7 @@ import { Lock } from 'lucide-react';
 import { Button, ErrorText } from '@/components/Blocks';
 import { AccentHeading, Container, SectionHeading, revealDelay } from '@/components/Section';
 import RichText from '@/components/RichText';
+import { Faq } from '@/components/HomeContent';
 import {
   type ClientResult,
   type RowError,
@@ -404,6 +405,8 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
           </div>
         </Container>
       </section>
+      {page.faqs && <Faq items={page.faqs} />}
+      <div className="h-24" />
     </>
   );
 }

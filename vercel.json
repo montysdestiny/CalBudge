@@ -28,6 +28,34 @@
     {
       "source": "/privacy",
       "destination": "/privacy.html"
+    },
+    {
+      "source": "/guides",
+      "destination": "/guides.html"
+    },
+    {
+      "source": "/guides/how-many-calories-to-lose-weight",
+      "destination": "/guides/how-many-calories-to-lose-weight.html"
+    },
+    {
+      "source": "/guides/how-much-protein-per-day",
+      "destination": "/guides/how-much-protein-per-day.html"
+    },
+    {
+      "source": "/guides/bmr-vs-tdee",
+      "destination": "/guides/bmr-vs-tdee.html"
+    },
+    {
+      "source": "/guides/how-to-split-calories-across-meals",
+      "destination": "/guides/how-to-split-calories-across-meals.html"
+    },
+    {
+      "source": "/guides/not-losing-weight-in-calorie-deficit",
+      "destination": "/guides/not-losing-weight-in-calorie-deficit.html"
+    },
+    {
+      "source": "/guides/how-to-calculate-macros-for-clients",
+      "destination": "/guides/how-to-calculate-macros-for-clients.html"
     }
   ],
   "headers": [

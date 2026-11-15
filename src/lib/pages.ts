@@ -4,6 +4,7 @@
 // Adding a page? Also add its rewrite to vercel.json (the build checks).
 
 import type { Goal } from '@/lib/calc';
+import { ARTICLES, type Article, articlePath } from '@/lib/articles';
 
 export const SITE_URL = 'https://cal-budge.vercel.app';
 
@@ -25,8 +26,11 @@ export interface LandingPage {
   intro: string;
   cta: string;
   /** 'bulk' renders the coaches' CSV tool instead of the single-person
-   *  calculator; 'privacy' renders the privacy policy. */
-  kind?: 'calculator' | 'bulk' | 'privacy';
+   *  calculator; 'privacy' renders the privacy policy; 'article' renders a
+   *  guide from articles.ts; 'guides' is the list of guides. */
+  kind?: 'calculator' | 'bulk' | 'privacy' | 'article' | 'guides';
+  /** The guide shown on an 'article' page. */
+  article?: Article;
   /** Goal pre-selected on the goal step when started from this page. */
   presetGoal?: Goal;
   /** Page-specific explainer shown above the shared "how it works" content. */
@@ -53,6 +57,32 @@ export const PAGES: LandingPage[] = [
       'Answer a few questions about your body and training. Get a daily calorie target you can actually plan around. Takes about a minute, no signup.',
     cta: 'Calculate my budget',
     sections: [],
+    faqs: [
+      {
+        q: 'What is TDEE?',
+        a: 'TDEE (total daily energy expenditure) is the number of calories you burn in a day, including exercise and everyday movement. Eating at your TDEE maintains your weight; eating below it loses weight, and above it gains weight.',
+      },
+      {
+        q: "What's the difference between BMR and TDEE?",
+        a: 'BMR (basal metabolic rate) is what your body burns at complete rest. TDEE is your BMR multiplied by an activity factor that accounts for training and daily movement, so it is always higher. More in [BMR vs TDEE](/guides/bmr-vs-tdee).',
+      },
+      {
+        q: 'How accurate is a calorie calculator?',
+        a: 'Any formula is an estimate. Treat your number as a starting point: track your weight for two to three weeks, then adjust up or down by 100 to 200 calories if you are not moving in the direction you expect.',
+      },
+      {
+        q: 'Can I use my own TDEE or BMR?',
+        a: 'Yes. If you already know your TDEE, choose "Yes, I know my TDEE" at the start. If you know your BMR from a lab test or smart scale, enter it in the optional step and CalBudge will use it instead of a formula.',
+      },
+      {
+        q: 'Can I use CalBudge with MyFitnessPal, MacroFactor or Cal AI?',
+        a: 'Yes. On the results screen, choose "Export to app" to copy your calorie and macro targets in a format ready to paste into those apps. You can also download your budget as an image or PDF.',
+      },
+      {
+        q: 'Do I need an account?',
+        a: 'No. CalBudge is free and there is no signup. The calculation runs in your browser and your answers are not saved anywhere.',
+      },
+    ],
   },
   {
     path: '/tdee-calculator',
@@ -410,6 +440,20 @@ export const PAGES: LandingPage[] = [
         ],
       },
     ],
+    faqs: [
+      {
+        q: 'Is the bulk macro calculator free?',
+        a: 'Yes. There is no account, no client limit and no watermark on the reports.',
+      },
+      {
+        q: 'Is my client data uploaded anywhere?',
+        a: 'No. The spreadsheet is read and calculated in your browser, and the reports are created on your device. Nothing is sent to a server or stored.',
+      },
+      {
+        q: 'What formulas does it use?',
+        a: 'The same as the single calculator: Mifflin-St Jeor for BMR, or Katch-McArdle when you include body fat, an activity factor from training sessions and steps, protein at 1.8 g per kg, fat at 25% of calories, and a target that never drops below 1.2 times BMR or 1,200 calories. The method is explained step by step in [how to calculate macros for your clients](/guides/how-to-calculate-macros-for-clients).',
+      },
+    ],
   },
   {
     path: '/privacy',
@@ -425,7 +469,41 @@ export const PAGES: LandingPage[] = [
     cta: 'Calculate my budget',
     sections: [],
   },
+  {
+    path: '/guides',
+    kind: 'guides',
+    ogTitle: 'Nutrition guides',
+    ogSubtitle: 'Calories, protein and macros, explained',
+    linkLabel: 'All guides',
+    title: 'Nutrition Guides: Calories, Protein & Macros | CalBudge',
+    description:
+      'Plain-English guides to calories, protein and macros: how much to eat to lose weight, how much protein you need, BMR vs TDEE and more.',
+    h1: 'Nutrition guides',
+    intro: 'Straight answers on calories, protein and macros, with worked examples from the same formulas as the calculator.',
+    cta: 'Calculate my budget',
+    sections: [],
+  },
+  ...ARTICLES.map(
+    (a): LandingPage => ({
+      path: articlePath(a.slug),
+      kind: 'article',
+      article: a,
+      linkLabel: a.linkLabel,
+      title: a.title,
+      ogTitle: a.ogTitle,
+      ogSubtitle: a.ogSubtitle,
+      description: a.description,
+      h1: a.h1,
+      intro: a.dek,
+      cta: a.calculator.label,
+      sections: [],
+      faqs: a.faqs,
+    }),
+  ),
 ];
+
+/** Calculator pages (the ones listed under "Calculators"). */
+export const isCalculatorPage = (p: LandingPage) => p.kind === undefined || p.kind === 'calculator' || p.kind === 'bulk';
 
 export function findPage(pathname: string): LandingPage {
   const normalized = pathname.replace(/\/+$/, '') || '/';

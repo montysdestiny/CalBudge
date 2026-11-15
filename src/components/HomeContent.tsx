@@ -5,7 +5,8 @@ import LivePreview from '@/components/LivePreview';
 import RichText from '@/components/RichText';
 import { AccentHeading, Container, Eyebrow, SectionHeading, revealDelay } from '@/components/Section';
 import { computeMacroSplit, computeMealSplit } from '@/lib/calc';
-import { type LandingPage, PAGES } from '@/lib/pages';
+import { articlePath, guidesFor } from '@/lib/articles';
+import { type LandingPage, PAGES, isCalculatorPage } from '@/lib/pages';
 import { cn } from '@/lib/utils';
 
 // Everything on a calculator page before the wizard starts. It's prerendered
@@ -59,33 +60,6 @@ const MEALS = [
   { meal: 'Lunch', share: '25%' },
   { meal: 'Dinner', share: '25%' },
   { meal: 'Snack, pre-workout, post-workout', share: '≈11% each' },
-];
-
-const FAQS = [
-  {
-    q: 'What is TDEE?',
-    a: 'TDEE (total daily energy expenditure) is the number of calories you burn in a day, including exercise and everyday movement. Eating at your TDEE maintains your weight; eating below it loses weight, and above it gains weight.',
-  },
-  {
-    q: "What's the difference between BMR and TDEE?",
-    a: 'BMR (basal metabolic rate) is what your body burns at complete rest. TDEE is your BMR multiplied by an activity factor that accounts for training and daily movement, so it is always higher.',
-  },
-  {
-    q: 'How accurate is a calorie calculator?',
-    a: 'Any formula is an estimate. Treat your number as a starting point: track your weight for two to three weeks, then adjust up or down by 100 to 200 calories if you are not moving in the direction you expect.',
-  },
-  {
-    q: 'Can I use my own TDEE or BMR?',
-    a: 'Yes. If you already know your TDEE, choose "Yes, I know my TDEE" at the start. If you know your BMR from a lab test or smart scale, enter it in the optional step and CalBudge will use it instead of a formula.',
-  },
-  {
-    q: 'Can I use CalBudge with MyFitnessPal, MacroFactor or Cal AI?',
-    a: 'Yes. On the results screen, choose "Export to app" to copy your calorie and macro targets in a format ready to paste into those apps. You can also download your budget as an image or PDF.',
-  },
-  {
-    q: 'Do I need an account?',
-    a: 'No. CalBudge is free and there is no signup. The calculation runs in your browser and your answers are not saved anywhere.',
-  },
 ];
 
 // Fair to the alternatives on purpose, including the row trackers win.
@@ -499,7 +473,7 @@ function Compare() {
   );
 }
 
-function Faq({ items }: { items: { q: string; a: string }[] }) {
+export function Faq({ items }: { items: { q: string; a: string }[] }) {
   return (
     <section aria-labelledby="faq" className="mt-24 sm:mt-32">
       <Container className="grid gap-10 lg:grid-cols-[1fr_1.7fr]">
@@ -556,7 +530,7 @@ function CoachBand() {
 }
 
 function MoreCalculators({ page }: { page: LandingPage }) {
-  const others = PAGES.filter(p => p.path !== page.path && p.kind !== 'privacy');
+  const others = PAGES.filter(p => p.path !== page.path && isCalculatorPage(p));
   return (
     <nav aria-labelledby="more-calculators" className="mt-24 sm:mt-32">
       <Container>
@@ -574,6 +548,36 @@ function MoreCalculators({ page }: { page: LandingPage }) {
                   <span className="block font-bold text-ink">{p.linkLabel}</span>
                   <span className="mt-0.5 block text-sm text-muted-text">{p.ogSubtitle}</span>
                 </span>
+                <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-hover:translate-x-1" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </nav>
+  );
+}
+
+function GuideLinks({ page }: { page: LandingPage }) {
+  return (
+    <nav aria-labelledby="guide-links" className="mt-16">
+      <Container>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 id="guide-links" className="font-display text-[1.75rem] leading-tight font-bold tracking-tight text-ink">
+            Guides
+          </h2>
+          <a href="/guides" className="text-sm font-medium text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
+            All guides
+          </a>
+        </div>
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {guidesFor(page.path).map((a, i) => (
+            <li key={a.slug} data-reveal style={revealDelay(i)}>
+              <a
+                href={articlePath(a.slug)}
+                className="group flex h-full items-center justify-between gap-4 rounded-xl bg-card px-5 py-4 shadow-ring transition-shadow duration-150 hover:shadow-[0_0_0_1px_var(--color-ink),0_6px_18px_-8px_rgb(27_42_74/0.35)]"
+              >
+                <span className="font-bold text-ink">{a.h1}</span>
                 <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-hover:translate-x-1" />
               </a>
             </li>
@@ -615,9 +619,10 @@ export default function HomeContent({ page, onStart }: { page: LandingPage; onSt
       {page.example && <Example example={page.example} />}
       {isHome ? <Maths /> : <MethodNote />}
       {isHome && <Compare />}
-      <Faq items={isHome ? FAQS : (page.faqs ?? [])} />
+      <Faq items={page.faqs ?? []} />
       {isHome && <CoachBand />}
       <MoreCalculators page={page} />
+      <GuideLinks page={page} />
       <CtaBand cta={page.cta} onStart={onStart} />
     </>
   );

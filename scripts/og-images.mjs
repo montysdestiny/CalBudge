@@ -1,6 +1,6 @@
 // Generates the social preview images (public/og/*.png), one per landing
 // page in src/lib/pages.ts. Run locally after changing page titles:
-//   node scripts/og-images.mjs
+//   node --import ./tests/register.mjs scripts/og-images.mjs
 // Needs Google Chrome (set CHROME_PATH if it isn't in the default spot).
 // The PNGs are committed, so Vercel builds don't need Chrome.
 import { spawnSync } from 'node:child_process'
@@ -74,6 +74,7 @@ for (const page of PAGES) {
   const htmlFile = path.join(tmp, 'page.html')
   fs.writeFileSync(htmlFile, html(page))
   const out = path.join(outDir, ogImageName(page.path))
+  fs.mkdirSync(path.dirname(out), { recursive: true })
   const res = spawnSync(chrome, [
     '--headless=new',
     '--disable-gpu',
