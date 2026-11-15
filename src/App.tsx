@@ -176,7 +176,7 @@ export default function App({ page }: { page: LandingPage }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-line-onink/60 bg-ink text-paper">
+      <header className="sticky top-0 z-40 border-b border-line bg-white/85 text-ink backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-3.5">
           <button
             type="button"
@@ -188,28 +188,28 @@ export default function App({ page }: { page: LandingPage }) {
               restart();
               goTo('welcome');
             }}
-            className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-paper"
+            className="flex cursor-pointer items-center gap-2.5 border-none bg-transparent p-0 text-ink"
             aria-label="CalBudge home"
           >
             <LogoMark />
-            <span className="font-display text-xl font-bold tracking-tight">CalBudge</span>
+            <span className="text-lg font-medium tracking-tight">CalBudge</span>
           </button>
           {!inWizard && (
-            <nav aria-label="Page sections" className="hidden items-center gap-7 text-sm font-medium text-onink-text md:flex">
+            <nav aria-label="Page sections" className="hidden items-center gap-7 text-sm text-muted-text md:flex">
               {isBulk ? (
-                <a href="/" className="hover:text-paper">Single calculator</a>
+                <a href="/" className="hover:text-ink">Single calculator</a>
               ) : isPrivacy ? (
                 <>
-                  <a href="/" className="hover:text-paper">Calculator</a>
-                  <a href="/coaches" className="hover:text-paper">For coaches</a>
+                  <a href="/" className="hover:text-ink">Calculator</a>
+                  <a href="/coaches" className="hover:text-ink">For coaches</a>
                 </>
               ) : (
                 <>
-                  <a href="#how-it-works" className="hover:text-paper">How it works</a>
+                  <a href="#how-it-works" className="hover:text-ink">How it works</a>
                   {/* The full method lives on the homepage; landing pages link to it. */}
-                  <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-paper">The maths</a>
-                  <a href="#faq" className="hover:text-paper">FAQ</a>
-                  <a href="/coaches" className="hover:text-paper">For coaches</a>
+                  <a href={page.path === '/' ? '#the-maths' : '/#the-maths'} className="hover:text-ink">The maths</a>
+                  <a href="#faq" className="hover:text-ink">FAQ</a>
+                  <a href="/coaches" className="hover:text-ink">For coaches</a>
                 </>
               )}
             </nav>
@@ -221,15 +221,15 @@ export default function App({ page }: { page: LandingPage }) {
               onChange={next => setState(s => ({ ...s, unitSystem: next ? 'imperial' : 'metric' }))}
             />
           ) : isBulk ? (
-            <a href="#upload" className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+            <a href="#upload" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
               Upload clients
             </a>
           ) : isPrivacy ? (
-            <a href="/" className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+            <a href="/" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
               Open calculator
             </a>
           ) : (
-            <button type="button" onClick={start} className="cursor-pointer rounded-lg border-none bg-accent px-4 py-2 text-sm font-bold text-ink transition-colors duration-150 hover:bg-accent-hover">
+            <button type="button" onClick={start} className="cursor-pointer rounded-full border-none bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-150 hover:bg-ink-hover">
               Get my number
             </button>
           )}
@@ -392,7 +392,7 @@ export default function App({ page }: { page: LandingPage }) {
               </Block>
               {history.length > 0 && (
                 <aside aria-label="Your answers" className="order-first rounded-2xl border border-line bg-card px-5 py-4 lg:sticky lg:top-24 lg:order-none">
-                  <div className="pb-1 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Your answers</div>
+                  <div className="pb-1 text-[0.9375rem] text-hint-text">Your answers</div>
                   {history.map(h => (
                     <SummaryRow key={`${h.editStepId}-${h.label}`} label={h.label} value={h.value} onEdit={() => editStep(h.editStepId)} />
                   ))}
@@ -403,12 +403,12 @@ export default function App({ page }: { page: LandingPage }) {
         )}
       </main>
 
-      <footer className="bg-ink-deep text-onink-text">
+      <footer className="border-t border-line bg-paper text-muted-text">
         <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.6fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2.5 text-paper">
+            <div className="flex items-center gap-2.5 text-ink">
               <LogoMark />
-              <span className="font-display text-xl font-bold tracking-tight">CalBudge</span>
+              <span className="text-lg font-medium tracking-tight">CalBudge</span>
             </div>
             <p className="mt-4 max-w-sm text-sm leading-relaxed">
               Estimates for informational purposes only, not medical advice. Talk to a healthcare professional before
@@ -416,31 +416,31 @@ export default function App({ page }: { page: LandingPage }) {
             </p>
           </div>
           <nav aria-label="Calculators">
-            <div className="text-sm font-bold text-paper">Calculators</div>
+            <div className="text-sm font-medium text-ink">Calculators</div>
             <ul className="mt-3 space-y-2 text-sm">
               {PAGES.filter(p => p.kind !== 'privacy').map(p => (
                 <li key={p.path}>
-                  <a href={p.path} className="hover:text-paper">{p.linkLabel}</a>
+                  <a href={p.path} className="hover:text-ink">{p.linkLabel}</a>
                 </li>
               ))}
             </ul>
           </nav>
           <div>
-            <div className="text-sm font-bold text-paper">About your data</div>
+            <div className="text-sm font-medium text-ink">About your data</div>
             <p className="mt-3 text-sm leading-relaxed">Your answers and client files stay in your browser. Nothing is uploaded or stored.</p>
             <div className="mt-3 flex flex-col items-start gap-2 text-sm">
-              <a href="/privacy" className="underline underline-offset-2 hover:text-paper">Privacy policy</a>
+              <a href="/privacy" className="underline underline-offset-2 hover:text-ink">Privacy policy</a>
               <button
                 type="button"
                 onClick={() => setCookieBannerOpen(true)}
-                className="cursor-pointer border-none bg-transparent p-0 text-sm text-onink-text underline underline-offset-2 hover:text-paper"
+                className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-text underline underline-offset-2 hover:text-ink"
               >
                 Cookie settings
               </button>
             </div>
           </div>
         </div>
-        <div className="border-t border-line-onink/50">
+        <div className="border-t border-line">
           <div className="mx-auto w-full max-w-6xl px-6 py-5 text-xs">© {new Date().getFullYear()} CalBudge</div>
         </div>
       </footer>
@@ -477,7 +477,7 @@ function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (impe
     { label: 'lb / in', value: true },
   ];
   return (
-    <div role="group" aria-label="Units" className="flex rounded-lg border border-line-onink p-0.5 text-[0.8125rem] font-medium">
+    <div role="group" aria-label="Units" className="flex rounded-full bg-hover-tint p-0.5 text-[0.8125rem]">
       {options.map(opt => {
         const selected = imperial === opt.value;
         return (
@@ -487,8 +487,8 @@ function UnitSwitch({ imperial, onChange }: { imperial: boolean; onChange: (impe
             aria-pressed={selected}
             onClick={() => onChange(opt.value)}
             className={
-              'cursor-pointer rounded-md border-none px-3 py-1.5 transition-colors duration-150 ' +
-              (selected ? 'bg-paper text-ink' : 'bg-transparent text-onink-text hover:text-paper')
+              'cursor-pointer rounded-full border-none px-3 py-1.5 transition-colors duration-150 ' +
+              (selected ? 'bg-ink text-paper' : 'bg-transparent text-muted-text hover:text-ink')
             }
           >
             {opt.label}
@@ -952,7 +952,7 @@ function StepResult({
   if (showExportApps) {
     return (
       <>
-        <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Export to other app</div>
+        <div className="mb-3 text-[0.9375rem] text-hint-text">Export to other app</div>
         <Block className="p-6">
           <p className="mb-5 text-[0.9375rem] text-muted-text">
             Copy your targets in a format ready to paste into another tracker's custom goals screen.
@@ -1003,7 +1003,7 @@ function StepResult({
         <div className="ledger-lines animate-block-in overflow-hidden rounded-2xl bg-ink p-7 text-paper sm:p-9" style={{ animationDelay: `${totalDelay}ms` }}>
           <div className="relative flex flex-wrap items-end justify-between gap-6">
             <div>
-              <div className="text-[0.8125rem] font-bold tracking-[0.12em] text-accent uppercase">Today's budget</div>
+              <div className="text-[0.9375rem] text-onink-text">Today's budget</div>
               <div className="mt-2 flex items-baseline gap-3">
                 <span className="font-display text-6xl font-bold tracking-tight tabular-nums sm:text-7xl">{odometerValue.toLocaleString()}</span>
                 <span className="text-base font-medium text-onink-text">kcal target</span>
@@ -1024,7 +1024,7 @@ function StepResult({
           </div>
         </div>
 
-        <div className="mt-8 mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Meal by meal</div>
+        <div className="mt-8 mb-3 text-[0.9375rem] text-hint-text">Meal by meal</div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {rows.map((r, i) => {
             const isExcluded = excludedMeals.has(r.name);
@@ -1046,7 +1046,7 @@ function StepResult({
         <div className={macros ? 'mt-8 grid grid-cols-1 gap-4 md:grid-cols-2' : 'mt-8'}>
           {macros && (
             <div className="flex min-w-0 flex-col">
-              <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Macros (estimated)</div>
+              <div className="mb-3 text-[0.9375rem] text-hint-text">Macros (estimated)</div>
               <Block className="flex-1 p-4 sm:p-6" style={{ animationDelay: `${macrosDelay}ms` }}>
                 <BudgetRings rings={macroRings} className="justify-center" />
                 <p className="mt-4 text-xs text-hint-text">
@@ -1056,7 +1056,7 @@ function StepResult({
             </div>
           )}
           <div className="flex min-w-0 flex-col">
-            <div className="mb-3 text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Composition</div>
+            <div className="mb-3 text-[0.9375rem] text-hint-text">Composition</div>
             <Block className="flex-1 p-4 sm:p-6" style={{ animationDelay: `${ringsDelay}ms` }}>
               <BudgetRings rings={rings} className="justify-center" />
             </Block>

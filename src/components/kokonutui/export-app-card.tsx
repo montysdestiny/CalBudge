@@ -61,7 +61,7 @@ export default function ExportAppCard({ name, initials, destination, onCopy }: E
           className={cn(
             "absolute inset-0 h-full w-full",
             "[backface-visibility:hidden] [transform:rotateY(0deg)]",
-            "flex flex-col items-center justify-center gap-2 rounded-xl border border-line bg-card p-4 text-center"
+            "flex flex-col items-center justify-center gap-2 rounded-xl bg-card shadow-ring p-4 text-center"
           )}
         >
           <span

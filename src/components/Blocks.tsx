@@ -20,7 +20,7 @@ export function Block({
 }) {
   return (
     <div
-      className={cn('animate-block-in rounded-2xl border border-line bg-card', className)}
+      className={cn('animate-block-in rounded-2xl bg-card shadow-ring', className)}
       style={style}
     >
       {children}
@@ -109,9 +109,10 @@ export function ToggleGroup<T extends string>({
             <button
               key={opt.value}
               type="button"
+              aria-pressed={selected}
               onClick={() => onChange(opt.value)}
               className={cn(
-                'cursor-pointer rounded-lg border px-4 py-2.5 text-[0.9375rem] font-semibold transition-colors duration-150',
+                'cursor-pointer rounded-full border px-4 py-2.5 text-[0.9375rem] font-medium transition-colors duration-150',
                 selected ? 'border-ink bg-ink text-paper hover:bg-ink-hover' : 'border-input bg-card text-ink hover:border-ink'
               )}
             >
@@ -134,7 +135,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        'cursor-pointer rounded-lg border border-ink px-5 py-3 text-[0.9375rem] font-bold transition-colors duration-150',
+        'cursor-pointer rounded-full border border-ink px-5 py-3 text-[0.9375rem] font-medium transition-colors duration-150',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         'disabled:cursor-not-allowed disabled:border-disabled disabled:bg-disabled disabled:text-paper',
         variant === 'solid' && 'bg-ink text-paper hover:bg-ink-hover',

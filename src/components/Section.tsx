@@ -9,7 +9,7 @@ export function Container({ children, className }: { children: ReactNode; classN
 
 export function Eyebrow({ children, onInk = false }: { children: ReactNode; onInk?: boolean }) {
   return (
-    <div className={cn('text-[0.8125rem] font-bold tracking-[0.12em] uppercase', onInk ? 'text-accent' : 'text-gold-ink')}>
+    <div className={cn('text-[0.9375rem]', onInk ? 'text-onink-text' : 'text-hint-text')}>
       {children}
     </div>
   );
@@ -34,7 +34,7 @@ export function SectionHeading({
       <h2
         id={id}
         className={cn(
-          'mt-3 scroll-mt-24 font-display text-[2rem] leading-[1.1] font-bold tracking-tight text-balance sm:text-[2.75rem]',
+          'mt-2 scroll-mt-24 text-[2rem] leading-[1.1] font-medium tracking-[-0.025em] text-balance sm:text-[2.75rem]',
           onInk ? 'text-paper' : 'text-ink',
         )}
       >

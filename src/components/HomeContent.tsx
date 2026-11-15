@@ -107,7 +107,7 @@ function CompareCell({ value, highlight = false }: { value: string | boolean; hi
 
 function Hero({ page, onStart }: { page: LandingPage; onStart: () => void }) {
   return (
-    <section className="ledger-lines bg-ink pt-14 pb-44 text-center sm:pt-20">
+    <section className="ledger-lines mt-3 mx-3 rounded-[28px] sm:mx-6 bg-ink pt-14 pb-44 text-center sm:pt-20">
       <Container className="relative">
         <div className="animate-block-in mx-auto inline-flex items-center gap-2 rounded-full border border-line-onink px-4 py-1.5 text-[0.8125rem] font-medium text-onink-text">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
@@ -124,7 +124,7 @@ function Hero({ page, onStart }: { page: LandingPage; onStart: () => void }) {
           </Button>
           <a
             href={page.example ? '#example' : '#the-maths'}
-            className="rounded-lg border border-line-onink px-7 py-3.5 text-base font-bold text-paper transition-colors duration-150 hover:bg-ink-raised"
+            className="rounded-full bg-white/10 px-7 py-3.5 text-base font-medium text-paper ring-1 ring-white/15 transition-colors duration-150 hover:bg-white/20"
           >
             {page.example ? 'See a worked example' : 'See how it’s calculated'}
           </a>
@@ -196,7 +196,7 @@ function Features() {
   const meals = computeMealSplit(2207);
   const macros = computeMacroSplit(80, 2207);
   const largest = Math.max(...meals.map(m => m.kcal));
-  const card = 'rounded-2xl border border-line bg-card p-7';
+  const card = 'min-w-0 rounded-2xl bg-card p-7 shadow-ring';
   return (
     <section aria-labelledby="features" className="mt-24 sm:mt-32">
       <Container>
@@ -268,7 +268,7 @@ function Features() {
 
 function Example({ example }: { example: NonNullable<LandingPage['example']> }) {
   return (
-    <section aria-labelledby="example" className="ledger-lines mt-24 bg-ink py-20 sm:mt-32 sm:py-28">
+    <section aria-labelledby="example" className="ledger-lines mt-24 mx-3 rounded-[28px] sm:mx-6 bg-ink py-20 sm:mt-32 sm:py-28">
       <Container className="relative">
         <SectionHeading id="example" eyebrow="Worked example" onInk className="max-w-3xl">
           {example.heading}
@@ -339,7 +339,7 @@ function MethodNote() {
 
 function Maths() {
   return (
-    <section aria-labelledby="the-maths" className="ledger-lines mt-24 bg-ink py-20 sm:mt-32 sm:py-28">
+    <section aria-labelledby="the-maths" className="ledger-lines mt-24 mx-3 rounded-[28px] sm:mx-6 bg-ink py-20 sm:mt-32 sm:py-28">
       <Container className="relative grid gap-12 lg:grid-cols-[1fr_1.7fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionHeading id="the-maths" eyebrow="The maths" onInk>
@@ -544,7 +544,7 @@ function CoachBand() {
           </div>
           <a
             href="/coaches"
-            className="inline-flex items-center justify-center gap-2 justify-self-start rounded-lg bg-accent px-7 py-3.5 text-base font-bold text-ink transition-colors duration-150 hover:bg-accent-hover md:justify-self-end"
+            className="inline-flex items-center justify-center gap-2 justify-self-start rounded-full bg-accent px-7 py-3.5 text-base font-medium text-ink transition-colors duration-150 hover:bg-accent-hover md:justify-self-end"
           >
             Open the bulk calculator
             <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -568,7 +568,7 @@ function MoreCalculators({ page }: { page: LandingPage }) {
             <li key={p.path} data-reveal style={revealDelay(i)}>
               <a
                 href={p.path}
-                className="group flex h-full items-center justify-between gap-4 rounded-xl border border-line bg-card px-5 py-4 transition-colors duration-150 hover:border-ink"
+                className="group flex h-full items-center justify-between gap-4 rounded-xl bg-card px-5 py-4 shadow-ring transition-shadow duration-150 hover:shadow-[0_0_0_1px_var(--color-ink),0_6px_18px_-8px_rgb(27_42_74/0.35)]"
               >
                 <span>
                   <span className="block font-bold text-ink">{p.linkLabel}</span>
@@ -586,7 +586,7 @@ function MoreCalculators({ page }: { page: LandingPage }) {
 
 function CtaBand({ cta, onStart }: { cta: string; onStart: () => void }) {
   return (
-    <section className="mt-24 bg-accent py-16 text-center sm:mt-32 sm:py-20">
+    <section className="mt-24 mx-3 rounded-[28px] sm:mx-6 bg-accent py-16 text-center sm:mt-32 sm:py-20">
       <Container>
         <h2 className="mx-auto max-w-3xl font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance text-ink sm:text-6xl" data-reveal>
           Ready to find your number?

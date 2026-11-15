@@ -76,7 +76,7 @@ export default function MealFlipCard({ name, kcal, percentOfTotal, excluded, onT
           className={cn(
             "absolute inset-0 h-full w-full",
             "[backface-visibility:hidden] [transform:rotateY(0deg)]",
-            "flex flex-col justify-between rounded-xl border border-line bg-card p-4"
+            "flex flex-col justify-between rounded-xl bg-card shadow-ring p-4"
           )}
         >
           <span className="pr-5 text-[0.9375rem] font-medium">{name}</span>

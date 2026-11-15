@@ -1,12 +1,15 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
-@import "@fontsource-variable/bricolage-grotesque";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans: 'Inter Variable', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Inter Variable', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  /* Same type scale as CalBudge Pro (modelled on recent.design): medium weights, no heavy bold. */
+  --font-weight-bold: 600;
+  --font-weight-semibold: 500;
+  --shadow-ring: 0 0 0 0.5px rgb(27 42 74 / 0.12), 0 1px 1px -1px rgb(27 42 74 / 0.22), 0 1px 2px 0 rgb(27 42 74 / 0.07);
   /* Formal navy/gold palette. Every color used anywhere in the app is a
      token here — components reference these, never a raw hex — so the
      whole scheme can be re-tuned from this one block. */
@@ -57,7 +60,7 @@
  * no .dark overrides (see design_spec.md).
  */
 :root {
-  --background: #F4F6F9; /* paper */
+  --background: #FFFFFF; /* white page; paper (#F4F6F9) is for panels */
   --foreground: #1B2A4A; /* ink (navy) */
   --primary: #1B2A4A;
   --primary-foreground: #F4F6F9;
@@ -71,9 +74,9 @@
   --border: #1B2A4A;
   --input: #C7CEDA;
   --ring: #C9A227;
-  --line: #C7CEDA;
+  --line: #E1E6EE;
   --surplus: #2F5233;
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 }
 
 @layer base {
@@ -96,19 +99,32 @@
   animation: block-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-/* Faint ruled lines behind navy sections: the ledger, not a glow. */
+/* Navy panels, as in CalBudge Pro: soft gold and blue glows over a faint grid. */
 .ledger-lines {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
 }
 .ledger-lines::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
-  background-size: 100% 44px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+.ledger-lines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 55% at 85% 0%, rgb(201 162 39 / 0.32), transparent 70%),
+    radial-gradient(45% 60% at 15% 100%, rgb(91 119 184 / 0.4), transparent 70%);
 }
 
 /* Scroll reveal: the class is only ever added by JS (hooks/useReveal.ts). */

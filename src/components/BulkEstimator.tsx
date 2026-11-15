@@ -156,7 +156,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
 
   return (
     <>
-      <section className="ledger-lines bg-ink pt-14 pb-44 text-center sm:pt-20">
+      <section className="ledger-lines mt-3 mx-3 rounded-[28px] sm:mx-6 bg-ink pt-14 pb-44 text-center sm:pt-20">
         <Container className="relative">
           <div className="animate-block-in mx-auto inline-flex items-center gap-2 rounded-full border border-line-onink px-4 py-1.5 text-[0.8125rem] font-medium text-onink-text">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
@@ -363,7 +363,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
       )}
 
       {privacySection && (
-        <section className="ledger-lines mt-24 bg-ink py-20 sm:mt-32 sm:py-24">
+        <section className="ledger-lines mt-24 mx-3 rounded-[28px] sm:mx-6 bg-ink py-20 sm:mt-32 sm:py-24">
           <Container className="relative grid gap-8 md:grid-cols-[1fr_1.6fr] md:gap-12">
             <SectionHeading eyebrow="Your clients' data" onInk>
               {privacySection.heading}
@@ -382,7 +382,7 @@ export default function BulkEstimator({ page }: { page: LandingPage }) {
       <section className="mt-24 mb-24 sm:mt-32 sm:mb-32">
         <Container>
           <SectionHeading eyebrow="Reference">File columns</SectionHeading>
-          <div className="mt-8 overflow-x-auto rounded-2xl border border-line bg-card" data-reveal>
+          <div className="mt-8 overflow-x-auto rounded-2xl bg-card shadow-ring" data-reveal>
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
                 <tr className="border-b border-line text-xs tracking-wide text-hint-text uppercase">

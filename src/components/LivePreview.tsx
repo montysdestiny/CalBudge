@@ -98,8 +98,8 @@ export default function LivePreview({ preset, onStart }: { preset?: Goal; onStar
       <div className="grid md:grid-cols-[1.05fr_1fr]">
         <div className="p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">Try it: example plan</div>
-            <div role="group" aria-label="Example goal" className="flex rounded-lg bg-hover-tint p-1 text-sm font-semibold">
+            <div className="text-[0.9375rem] text-hint-text">Try it: example plan</div>
+            <div role="group" aria-label="Example goal" className="flex rounded-full bg-hover-tint p-1 text-sm">
               {GOALS.map(g => (
                 <button
                   key={g.value}
@@ -107,7 +107,7 @@ export default function LivePreview({ preset, onStart }: { preset?: Goal; onStar
                   aria-pressed={goal === g.value}
                   onClick={() => setGoal(g.value)}
                   className={cn(
-                    'cursor-pointer rounded-md px-3 py-1.5 transition-colors duration-150',
+                    'cursor-pointer rounded-full px-3 py-1.5 transition-colors duration-150',
                     goal === g.value ? 'bg-ink text-paper' : 'text-muted-text hover:text-ink',
                   )}
                 >

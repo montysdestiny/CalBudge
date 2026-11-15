@@ -70,7 +70,7 @@ function ContactEmail() {
 export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: () => void }) {
   return (
     <>
-      <section className="ledger-lines bg-ink pt-14 pb-16 sm:pt-20">
+      <section className="ledger-lines mt-3 mx-3 rounded-[28px] sm:mx-6 bg-ink pt-14 pb-16 sm:pt-20">
         <Container className="relative">
           <h1 className="animate-block-in font-display text-5xl leading-none font-bold tracking-[-0.03em] text-paper sm:text-7xl">Privacy policy</h1>
           <p className="mt-4 text-sm text-onink-text">Last updated {LAST_UPDATED}</p>
@@ -83,7 +83,7 @@ export default function PrivacyPolicy({ onCookieSettings }: { onCookieSettings: 
       </section>
       <Container className="grid gap-12 py-14 lg:grid-cols-[240px_1fr] sm:py-20">
         <nav aria-label="On this page" className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
-          <div className="text-[0.8125rem] font-bold tracking-[0.12em] text-gold-ink uppercase">On this page</div>
+          <div className="text-[0.9375rem] text-hint-text">On this page</div>
           <ul className="mt-3 space-y-2 text-sm">
             {SECTIONS.map(t => (
               <li key={t}>
