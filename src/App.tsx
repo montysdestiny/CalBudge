@@ -437,11 +437,14 @@ export default function App({ page }: { page: LandingPage }) {
           <nav aria-label="Guides">
             <div className="text-sm font-medium text-ink">Guides</div>
             <ul className="mt-3 space-y-2 text-sm">
-              {ARTICLES.map(a => (
+              {ARTICLES.filter(a => !a.comparison).map(a => (
                 <li key={a.slug}>
                   <a href={articlePath(a.slug)} className="hover:text-ink">{a.linkLabel}</a>
                 </li>
               ))}
+              <li>
+                <a href={articlePath('best-free-calorie-and-macro-calculators')} className="hover:text-ink">Compare calculators</a>
+              </li>
               <li>
                 <a href="/guides" className="font-medium hover:text-ink">All guides</a>
               </li>

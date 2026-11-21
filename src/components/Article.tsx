@@ -175,7 +175,14 @@ export function GuidesIndex({ page }: { page: LandingPage }) {
         <h1 className="text-[2.5rem] leading-[1.05] font-medium tracking-[-0.03em] text-ink sm:text-[3.5rem]">{page.h1}</h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-text">{page.intro}</p>
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ARTICLES.map((a, i) => (
+          {ARTICLES.filter(a => !a.comparison).map((a, i) => (
+            <GuideCard key={a.slug} article={a} index={i} />
+          ))}
+        </ul>
+        <h2 className="mt-16 text-[1.75rem] leading-tight font-medium tracking-tight text-ink">How CalBudge compares</h2>
+        <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-text">Honest side-by-sides with the calculators and tracking apps people weigh it against.</p>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ARTICLES.filter(a => a.comparison).map((a, i) => (
             <GuideCard key={a.slug} article={a} index={i} />
           ))}
         </ul>

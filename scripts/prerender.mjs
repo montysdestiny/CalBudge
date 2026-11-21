@@ -129,7 +129,8 @@ fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap)
 // their crawlers. Built from PAGES so it never goes stale; the method section
 // mirrors src/lib/calc.ts.
 const calculators = PAGES.filter(p => !p.kind || p.kind === 'calculator' || p.kind === 'bulk')
-const guides = PAGES.filter(p => p.kind === 'article')
+const guides = PAGES.filter(p => p.kind === 'article' && !p.article.comparison)
+const comparisons = PAGES.filter(p => p.kind === 'article' && p.article.comparison)
 const llms = `# CalBudge
 
 > CalBudge is a free calorie and macro calculator at ${SITE_URL}. It works out your BMR, TDEE (maintenance calories) and a daily calorie target for losing, maintaining or gaining weight, then splits that target meal by meal (breakfast, lunch, dinner, snack, pre- and post-workout) with protein, carb and fat targets. No account or signup, and answers are processed in the browser. A separate free bulk tool lets coaches and personal trainers upload a spreadsheet of clients and download a PDF report with targets for each.
@@ -141,6 +142,10 @@ ${calculators.map(p => `- [${p.linkLabel}](${abs(p.path)}): ${p.description}`).j
 ## Guides
 
 ${guides.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join('\n')}
+
+## Comparisons
+
+${comparisons.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join('\n')}
 
 ## Method
 

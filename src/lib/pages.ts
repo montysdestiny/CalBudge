@@ -67,6 +67,10 @@ export const PAGES: LandingPage[] = [
         a: 'BMR (basal metabolic rate) is what your body burns at complete rest. TDEE is your BMR multiplied by an activity factor that accounts for training and daily movement, so it is always higher. More in [BMR vs TDEE](/guides/bmr-vs-tdee).',
       },
       {
+        q: 'How is CalBudge different from MyFitnessPal or MacroFactor?',
+        a: 'Those are food trackers; CalBudge is a calculator. It works out your calorie and macro targets, in grams and meal by meal, for free and without an account, and copies them into your tracker. See [CalBudge vs MyFitnessPal](/guides/calbudge-vs-myfitnesspal), [CalBudge vs MacroFactor](/guides/calbudge-vs-macrofactor) or [how the free calculators compare](/guides/best-free-calorie-and-macro-calculators).',
+      },
+      {
         q: 'How accurate is a calorie calculator?',
         a: 'Any formula is an estimate. Treat your number as a starting point: track your weight for two to three weeks, then adjust up or down by 100 to 200 calories if you are not moving in the direction you expect.',
       },
@@ -110,6 +114,7 @@ export const PAGES: LandingPage[] = [
         paragraphs: [
           'CalBudge first estimates your BMR, then multiplies it by an activity factor between 1.2 and 1.9 based on how many gym and cardio sessions you do each week. Unlike most calculators, you can also enter your average daily steps, which nudges the factor up or down to reflect how active you are outside the gym.',
           'Your results show your TDEE alongside your BMR, so you can see exactly where the number comes from.',
+          'See [how CalBudge compares to other free calculators](/guides/best-free-calorie-and-macro-calculators) and tracking apps, including what each one gives you without an account.',
         ],
       },
     ],
@@ -245,6 +250,7 @@ export const PAGES: LandingPage[] = [
           'CalBudge offers three paces: mild (10% below your TDEE), moderate (20% below) and aggressive (27.5% below). A mild deficit is easier to stick to and better for keeping muscle. An aggressive one is faster but harder to sustain.',
           'Whatever pace you choose, your target never drops below 1.2 times your BMR or below 1,200 calories a day. If your chosen pace would go lower, CalBudge raises your target and tells you.',
           'Add a target weight and you will also get a rough estimate of how many weeks it could take.',
+          'Prefer an app that adjusts your deficit for you as you log? [CalBudge vs MacroFactor](/guides/calbudge-vs-macrofactor) compares a free calculator with an adaptive tracker, and [this comparison](/guides/best-free-calorie-and-macro-calculators) covers the other free options.',
         ],
       },
     ],
@@ -372,6 +378,7 @@ export const PAGES: LandingPage[] = [
         heading: 'Use your macros in your tracker',
         paragraphs: [
           'On the results screen, choose "Export to app" to copy your calorie and macro targets in a format ready to paste into MyFitnessPal, MacroFactor or Cal AI. You can also download them as an image or PDF.',
+          'Want gram-based macros without paying for MyFitnessPal Premium? Its free tier sets macro goals as percentages; CalBudge gives you the grams free. [CalBudge vs MyFitnessPal](/guides/calbudge-vs-myfitnesspal) explains how to use the two together.',
         ],
       },
     ],

@@ -9,6 +9,17 @@ import { articlePath, guidesFor } from '@/lib/articles';
 import { type LandingPage, PAGES, isCalculatorPage } from '@/lib/pages';
 import { cn } from '@/lib/utils';
 
+// Tracker names link to the matching comparison page.
+const EXPORT_CHIPS: { label: string; href?: string }[] = [
+  { label: 'MyFitnessPal', href: '/guides/calbudge-vs-myfitnesspal' },
+  { label: 'MacroFactor', href: '/guides/calbudge-vs-macrofactor' },
+  { label: 'Cal AI' },
+  { label: 'Image' },
+  { label: 'PDF' },
+  { label: 'Share link' },
+];
+
+
 // Everything on a calculator page before the wizard starts. It's prerendered
 // at build time, so it's what search engines index. The homepage gets the full
 // method and FAQ; landing pages get their own worked example and FAQ (from
@@ -198,12 +209,19 @@ function Features() {
             <h3 className="font-display text-xl font-bold tracking-tight text-paper">Take it with you</h3>
             <p className="mt-2 text-base text-onink-text">Copy your targets into your tracker, or save your plan.</p>
             <ul className="mt-auto flex flex-wrap gap-2 pt-6 text-sm font-medium text-paper">
-              {['MyFitnessPal', 'MacroFactor', 'Cal AI', 'Image', 'PDF', 'Share link'].map(item => (
-                <li key={item} className="rounded-full border border-line-onink px-3 py-1">
-                  {item}
+              {EXPORT_CHIPS.map(item => (
+                <li key={item.label} className="rounded-full border border-line-onink px-3 py-1">
+                  {item.href ? (
+                    <a href={item.href} className="underline-offset-2 hover:underline">{item.label}</a>
+                  ) : (
+                    item.label
+                  )}
                 </li>
               ))}
             </ul>
+            <a href="/guides/best-free-calorie-and-macro-calculators" className="mt-4 text-sm text-onink-text underline underline-offset-2 hover:text-paper">
+              Using a tracker already? See how CalBudge compares
+            </a>
           </div>
 
           <div data-reveal className={cn(card, 'md:col-span-3')}>

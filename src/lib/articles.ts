@@ -4,6 +4,8 @@
 // Every worked number here comes from src/lib/calc.ts; update both together.
 // Copy supports [label](/path) links, like pages.ts.
 
+import { COMPARISONS } from '@/lib/comparisons';
+
 export type ArticleBlock =
   | { h2: string }
   | { p: string }
@@ -33,9 +35,11 @@ export interface Article {
   /** The calculator this guide leads into. */
   calculator: { path: string; label: string };
   related: string[];
+  /** Comparison pages are listed separately from guides. */
+  comparison?: boolean;
 }
 
-export const ARTICLES: Article[] = [
+const GUIDES: Article[] = [
   {
     slug: 'how-many-calories-to-lose-weight',
     linkLabel: 'How many calories to lose weight',
@@ -185,7 +189,7 @@ export const ARTICLES: Article[] = [
         ],
       },
       {
-        tip: 'Figures are typical values and vary by brand. Check the label for anything packaged.',
+        tip: 'Figures are typical values and vary by brand. Check the label for anything packaged. To see what you actually eat, including vitamins and minerals, log a few days in a tracker such as Cronometer: [CalBudge vs Cronometer](/guides/calbudge-vs-cronometer) shows how to set it up with your targets.',
       },
     ],
     faqs: [
@@ -413,6 +417,9 @@ export const ARTICLES: Article[] = [
         ],
       },
       {
+        p: 'This is the adjustment adaptive apps such as MacroFactor make for you each week from your logged food and weight. Doing it by hand is free; [CalBudge vs MacroFactor](/guides/calbudge-vs-macrofactor) compares the two approaches.',
+      },
+      {
         tip: 'If you are eating carefully and losing nothing for months, or are gaining without explanation, talk to a doctor. Some medical conditions and medications affect weight.',
       },
     ],
@@ -492,6 +499,9 @@ export const ARTICLES: Article[] = [
       {
         tip: 'Keep the same method for every client. When everyone is calculated the same way, it is easier to spot who is responding differently.',
       },
+      {
+        p: 'Clients often already use a tracking app. [This comparison of calculators and trackers](/guides/best-free-calorie-and-macro-calculators) shows how CalBudge targets fit MyFitnessPal, MacroFactor and Cronometer, so you can hand clients numbers in the app they know.',
+      },
     ],
     faqs: [
       {
@@ -512,11 +522,14 @@ export const ARTICLES: Article[] = [
   },
 ];
 
+/** Guides first, then the comparison pages (src/lib/comparisons.ts). */
+export const ARTICLES: Article[] = [...GUIDES, ...COMPARISONS];
+
 export const articlePath = (slug: string) => `/guides/${slug}`;
 export const findArticle = (slug: string) => ARTICLES.find(a => a.slug === slug);
 
 /** A few guides to link from a calculator page: the ones that lead into it first. */
 export function guidesFor(path: string, count = 3) {
-  const own = ARTICLES.filter(a => a.calculator.path === path);
-  return [...own, ...ARTICLES.filter(a => !own.includes(a))].slice(0, count);
+  const own = GUIDES.filter(a => a.calculator.path === path);
+  return [...own, ...GUIDES.filter(a => !own.includes(a))].slice(0, count);
 }

@@ -56,6 +56,22 @@
     {
       "source": "/guides/how-to-calculate-macros-for-clients",
       "destination": "/guides/how-to-calculate-macros-for-clients.html"
+    },
+    {
+      "source": "/guides/best-free-calorie-and-macro-calculators",
+      "destination": "/guides/best-free-calorie-and-macro-calculators.html"
+    },
+    {
+      "source": "/guides/calbudge-vs-myfitnesspal",
+      "destination": "/guides/calbudge-vs-myfitnesspal.html"
+    },
+    {
+      "source": "/guides/calbudge-vs-macrofactor",
+      "destination": "/guides/calbudge-vs-macrofactor.html"
+    },
+    {
+      "source": "/guides/calbudge-vs-cronometer",
+      "destination": "/guides/calbudge-vs-cronometer.html"
     }
   ],
   "headers": [
