@@ -553,8 +553,21 @@ export const ABOUT: Article = {
   published: '2026-11-21',
   readMinutes: 4,
   shortAnswer:
-    'CalBudge is a free, independent calorie and macro calculator. It estimates your BMR and TDEE with published equations, sets a daily target for your goal with a safety floor, and splits it into meals with protein, carb and fat targets. It needs no account, processes your answers in your browser, and offers a free bulk version for coaches.',
+    'CalBudge is a free, independent calorie and macro calculator built by Alexander Montgomery in Thessaloniki, Greece. It estimates your BMR and TDEE with published equations, sets a daily target for your goal with a safety floor, and splits it into meals with protein, carb and fat targets. It needs no account, processes your answers in your browser, and offers a free bulk version for coaches.',
   body: [
+    { h2: 'Who makes CalBudge' },
+    {
+      p: 'CalBudge is built by Alexander Montgomery, an independent developer based in Thessaloniki, Greece. You can find him on Instagram at [@monty.systems](https://www.instagram.com/monty.systems/).',
+    },
+    {
+      p: 'Since 2024 Alexander has tracked his own nutrition, body composition and training every day. He built CalBudge after finding that most calorie calculators stop at a single number, which is hard to turn into actual meals. He wanted one that shows the method openly, splits the day meal by meal, and doesn’t ask for an account.',
+    },
+    {
+      p: 'He has been building software since school, including concepts for Microsoft’s Imagine Cup in 2021 and 2022 and a physics simulator presented at a national student informatics conference. Today he builds and maintains CalBudge himself, in English and Greek.',
+    },
+    {
+      p: 'Alexander is not a dietitian or doctor. That is why every formula CalBudge uses comes from published research (listed below), the full method is public, and the site points people with medical conditions to a professional.',
+    },
     { h2: 'What CalBudge does' },
     {
       p: 'Most calorie calculators stop at a single number. CalBudge goes one step further and turns that number into a day you can plan: a target for each meal, with protein, carbohydrate and fat. You can copy the result into a tracking app such as MyFitnessPal, MacroFactor or Cal AI, or save it as an image or PDF.',
@@ -593,6 +606,10 @@ export const ABOUT: Article = {
     },
   ],
   faqs: [
+    {
+      q: 'Who made CalBudge?',
+      a: 'Alexander Montgomery, an independent developer in Thessaloniki, Greece, who has tracked his own nutrition and training daily since 2024. He is not a dietitian; the formulas come from published research, cited on this page.',
+    },
     {
       q: 'Is CalBudge free?',
       a: 'Yes. The calculator, the guides and the bulk calculator for coaches are all free, with no account and no ads.',

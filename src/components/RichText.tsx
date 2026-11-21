@@ -1,8 +1,9 @@
 // Renders copy from pages.ts, turning [label](/path) into a link. Internal
 // links between the calculator pages help visitors and help Google find and
-// weigh those pages. Only site-relative paths are linked.
+// weigh those pages. Site-relative paths and https links are linked; https
+// links open normally with rel="noopener" (and "me" for our own profiles).
 
-const LINK = /\[([^\]]+)\]\((\/[^)\s]*)\)/g;
+const LINK = /\[([^\]]+)\]\(((?:\/|https:\/\/)[^)\s]*)\)/g;
 
 export default function RichText({ text, onInk = false }: { text: string; onInk?: boolean }) {
   const linkClass = onInk
@@ -13,7 +14,7 @@ export default function RichText({ text, onInk = false }: { text: string; onInk?
   for (const m of text.matchAll(LINK)) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     parts.push(
-      <a key={m.index} href={m[2]} className={linkClass}>
+      <a key={m.index} href={m[2]} className={linkClass} rel={m[2].startsWith('https://') ? 'me noopener' : undefined}>
         {m[1]}
       </a>,
     );

@@ -25,7 +25,7 @@ const marker = '<div id="root"></div>'
 if (!template.includes(marker)) throw new Error(`prerender: ${marker} not found in dist/index.html`)
 
 // FAQ answers and guide copy use [label](/path) links; plain text for schema.
-const plain = s => s.replace(/\[([^\]]+)\]\((\/[^)\s]*)\)/g, '$1')
+const plain = s => s.replace(/\[([^\]]+)\]\(((?:\/|https:\/\/)[^)\s]*)\)/g, '$1')
 const abs = p => (p === '/' ? `${SITE_URL}/` : `${SITE_URL}${p}`)
 const ldScript = obj => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
 
@@ -41,6 +41,16 @@ const ORG = {
   email: 'calbudgehelp@outlook.com',
   ...(SAME_AS.length ? { sameAs: SAME_AS } : {}),
 }
+// The person behind CalBudge: author of the guides (shown on /about).
+const PERSON = {
+  '@type': 'Person',
+  name: 'Alexander Montgomery',
+  url: `${SITE_URL}/about`,
+  sameAs: ['https://www.instagram.com/monty.systems/'],
+  homeLocation: { '@type': 'Place', name: 'Thessaloniki, Greece' },
+  worksFor: { '@type': 'Organization', name: 'CalBudge', url: `${SITE_URL}/` },
+}
+ORG.founder = { '@type': 'Person', name: PERSON.name, url: PERSON.url }
 const citations = ids => (ids ?? []).map(id => ({ '@type': 'CreativeWork', name: SOURCES[id].text, ...(SOURCES[id].url ? { url: SOURCES[id].url } : {}) }))
 const CALCULATOR_FEATURES = [
   'BMR with Mifflin-St Jeor, Katch-McArdle (with body fat) or a known BMR',
@@ -119,11 +129,11 @@ for (const page of PAGES) {
     replaceMainLd({ '@context': 'https://schema.org', '@type': page.kind === 'guides' ? 'CollectionPage' : 'WebPage', name: page.h1, url, description: page.description })
   }
   if (page.kind === 'about') {
-    replaceMainLd({ '@context': 'https://schema.org', '@type': 'AboutPage', name: page.h1, url, description: page.description, dateModified: page.article.updated ?? page.article.published, about: ORG, citation: citations(page.article.sources) })
+    replaceMainLd({ '@context': 'https://schema.org', '@type': 'AboutPage', name: page.h1, url, description: page.description, dateModified: page.article.updated ?? page.article.published, about: ORG, mainEntity: PERSON, citation: citations(page.article.sources) })
   }
   if (page.kind === 'article') {
     const a = page.article
-    const org = { ...ORG, '@id': `${SITE_URL}/about` }
+    const org = ORG
     replaceMainLd({
       '@context': 'https://schema.org',
       '@type': 'Article',
@@ -135,7 +145,7 @@ for (const page of PAGES) {
       image,
       datePublished: a.published,
       dateModified: a.updated ?? a.published,
-      author: org,
+      author: PERSON,
       publisher: org,
       inLanguage: 'en',
       ...(a.sources?.length ? { citation: citations(a.sources) } : {}),

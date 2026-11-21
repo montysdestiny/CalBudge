@@ -129,7 +129,7 @@ export function ArticlePage({ page }: { page: LandingPage }) {
         <h1 className="mt-3 text-[2.25rem] leading-[1.08] font-medium tracking-[-0.03em] text-balance text-ink sm:text-[3rem]">{a.h1}</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-text">{a.dek}</p>
         <p className="mt-4 text-sm text-hint-text">
-          {a.about ? 'Updated ' : <>By <a href="/about" className="underline decoration-line underline-offset-2 hover:text-ink">CalBudge</a> · {a.updated ? 'Updated ' : ''}</>}
+          {a.about ? 'Updated ' : <>By <a href="/about" className="underline decoration-line underline-offset-2 hover:text-ink">Alexander Montgomery</a> · {a.updated ? 'Updated ' : ''}</>}
           <time dateTime={a.updated ?? a.published}>{formatDate(a.updated ?? a.published)}</time> · {a.readMinutes} min read
         </p>
 
