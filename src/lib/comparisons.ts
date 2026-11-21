@@ -74,7 +74,7 @@ export const COMPARISONS: Article[] = ([
           'You want your numbers, free, without signing up: [CalBudge](/) or TDEE Calculator. Choose CalBudge if you also want each meal planned out.',
           'You want to log food without paying: MyFitnessPal or Cronometer, with targets from a calculator.',
           'You log every day and want targets that adapt: MacroFactor.',
-          'You coach several clients: CalBudge’s [bulk calculator](/coaches) does a whole roster from one spreadsheet, free.',
+          'You coach several clients: CalBudge’s [bulk calculator](/coaches) does a whole roster from one spreadsheet, free. See [the options for coaches compared](/guides/best-macro-calculator-for-personal-trainers).',
         ],
       },
       {
@@ -97,6 +97,72 @@ export const COMPARISONS: Article[] = ([
     ],
     calculator: { path: '/', label: 'Calculate my targets' },
     related: ['calbudge-vs-myfitnesspal', 'calbudge-vs-macrofactor', 'calbudge-vs-cronometer'],
+  },
+  {
+    slug: 'best-macro-calculator-for-personal-trainers',
+    linkLabel: 'Macro calculators for coaches compared',
+    title: 'Best Free Macro Calculator for Personal Trainers and Coaches (2026) | CalBudge',
+    description:
+      'How personal trainers can calculate calories and macros for many clients at once: bulk calculators, spreadsheet templates, single-client calculators and coaching platforms compared.',
+    h1: 'The best way to calculate macros for all your clients',
+    dek: 'Most free macro calculators do one person at a time. Here are the options for a whole client list, from spreadsheets to bulk tools, and what each costs.',
+    ogTitle: 'Macro calculators for coaches',
+    ogSubtitle: 'Do your whole client list at once',
+    published: '2026-11-21',
+    readMinutes: 5,
+    shortAnswer:
+      'To calculate calories and macros for many clients at once for free, use CalBudge’s bulk calculator: upload a spreadsheet of clients (CSV, up to 1,000 per file) and get every client’s calorie target, TDEE, BMR, macros and meal split, with a PDF report. It needs no account and the file never leaves your browser. The alternatives are building your own Google Sheets formulas, entering clients one by one into a single-person calculator, or a paid coaching platform.',
+    body: [
+      { h2: 'The four ways to do it' },
+      {
+        table: {
+          columns: ['', 'Clients at once', 'Cost', 'Setup', 'Output', 'Best for'],
+          rows: [
+            ['CalBudge bulk calculator', 'Yes, from one spreadsheet', 'Free, no account', 'Fill in a template', 'PDF report per client, or CSV', 'Setting starting targets for a roster'],
+            ['Your own spreadsheet formulas', 'Yes, one row per client', 'Free', 'Write and check the formulas yourself', 'Whatever you build', 'Coaches who want to customise the maths'],
+            ['Single-person calculators', 'No, one at a time', 'Usually free', 'None', 'On-screen numbers', 'An occasional new client'],
+            ['Coaching platforms with nutrition tools', 'Per client, inside the app', 'Paid subscription, often after a trial', 'Onboard each client', 'Targets in the client’s app', 'Delivering and tracking plans day to day'],
+          ],
+          caption: `Checked ${CHECKED}.`,
+        },
+      },
+      { h2: 'CalBudge’s bulk calculator' },
+      {
+        p: 'Download the template, add one client per row (name, sex, age, height, weight, gym and cardio sessions per week, goal and pace; steps, body fat and target weight are optional), and upload it. Every client is calculated with Mifflin-St Jeor, or Katch-McArdle when you include body fat, an activity factor from sessions and steps, and a target that never drops below 1.2 × BMR or 1,200 calories. You get a summary page plus a page per client with their target, TDEE, BMR, macros, a meal-by-meal split and, with a target weight, a timeline. The spreadsheet is read in your browser and never uploaded, which matters for client health data.',
+      },
+      { p: 'Where it stops: it sets starting targets. It does not deliver plans to clients’ phones or track their check-ins. [Open the bulk calculator](/coaches).' },
+      { h2: 'Building your own spreadsheet' },
+      {
+        p: 'A Google Sheets or Excel sheet with one row per client and formula columns for BMR, TDEE, target and macros is free and fully customisable. The catch is the work: writing the formulas, adding safety limits so no target goes too low, handling kg and lb, and making something presentable to send. [Our method for coaches](/guides/how-to-calculate-macros-for-clients) lists the formulas if you want to build it.',
+      },
+      { h2: 'Single-person macro calculators' },
+      {
+        p: 'Free calculators such as CalBudge’s own [macro calculator](/macro-calculator) are quick for one person. For a roster you re-enter every client by hand and copy the results out, which is fine for one new client a week and slow for thirty.',
+      },
+      { h2: 'Coaching platforms' },
+      {
+        p: 'Paid coaching platforms, Everfit and Trainerize among them, include nutrition tools alongside programming, messaging and check-ins. They make sense if you want clients to receive and log their plans in an app. They cost a monthly subscription, and targets are set client by client as you onboard them.',
+      },
+      {
+        tip: 'A common setup: calculate starting targets for everyone in CalBudge’s bulk calculator, then enter them into whichever app your clients already use.',
+      },
+    ],
+    faqs: [
+      {
+        q: 'Is there a free tool to calculate macros for all my clients at once?',
+        a: 'Yes. CalBudge’s bulk calculator takes a CSV of up to 1,000 clients and calculates calories, TDEE, BMR, macros and a meal split for each, with a downloadable PDF report. It is free, needs no account, and processes the file in your browser.',
+      },
+      {
+        q: 'Can I import my client spreadsheet from Excel or Google Sheets?',
+        a: 'Yes. Save or download it as CSV from Excel, Google Sheets or Numbers. CalBudge’s template shows the column names; heights and weights can be in cm and kg or inches and pounds.',
+      },
+      {
+        q: 'Is it safe to upload client data to a macro calculator?',
+        a: 'It depends where the data goes. CalBudge’s bulk calculator never uploads it: the file is read and the reports are created on your own device.',
+      },
+    ],
+    calculator: { path: '/coaches', label: 'Open the bulk calculator' },
+    related: ['how-to-calculate-macros-for-clients', 'best-free-calorie-and-macro-calculators', 'calbudge-vs-myfitnesspal'],
   },
   {
     slug: 'calbudge-vs-myfitnesspal',

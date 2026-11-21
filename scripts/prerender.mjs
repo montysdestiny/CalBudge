@@ -29,7 +29,26 @@ const plain = s => s.replace(/\[([^\]]+)\]\((\/[^)\s]*)\)/g, '$1')
 const abs = p => (p === '/' ? `${SITE_URL}/` : `${SITE_URL}${p}`)
 const ldScript = obj => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
 
-const escapeAttr = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+const isCalculator = p => !p.kind || p.kind === 'calculator' || p.kind === 'bulk'
+const ORG = { '@type': 'Organization', name: 'CalBudge', url: `${SITE_URL}/`, email: 'calbudgehelp@outlook.com' }
+const CALCULATOR_FEATURES = [
+  'BMR with Mifflin-St Jeor, Katch-McArdle (with body fat) or a known BMR',
+  'TDEE from gym and cardio sessions per week and daily steps',
+  'Calorie targets for cutting, maintaining or bulking at three paces, with a safety floor',
+  'Protein, carbohydrate and fat targets in grams',
+  'Meal-by-meal split: breakfast, lunch, dinner, snack, pre- and post-workout',
+  'Copy targets into MyFitnessPal, MacroFactor or Cal AI; save as image or PDF',
+  'No account or signup; answers processed in the browser',
+]
+const BULK_FEATURES = [
+  'Calculates calories, TDEE, BMR, macros and meal splits for up to 1,000 clients from one CSV',
+  'Works with exports from Excel, Google Sheets and Numbers, in metric or imperial units',
+  'PDF report with a summary page and a page per client, or a CSV of results',
+  'Files are processed in the browser and never uploaded',
+  'Free, no account, no watermark',
+]
+
+const escapeAttr =s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 // Replace a tag's value, failing loudly if index.html no longer has it.
 function setTag(html, regex, value) {
@@ -64,6 +83,26 @@ for (const page of PAGES) {
   // plain web pages, and each guide is an article.
   const replaceMainLd = obj => {
     html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, () => ldScript(obj))
+  }
+  if (isCalculator(page)) {
+    // A specific application description per calculator: what it does and
+    // that it is free, which search engines and AI assistants quote.
+    replaceMainLd({
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: page.path === '/' ? 'CalBudge' : `CalBudge ${page.linkLabel.replace(/^./, c => c.toUpperCase())}`,
+      url,
+      description: page.description,
+      applicationCategory: 'HealthApplication',
+      operatingSystem: 'Any (runs in the browser)',
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      featureList: page.kind === 'bulk' ? BULK_FEATURES : CALCULATOR_FEATURES,
+      publisher: ORG,
+    })
+  }
+  if (page.path === '/') {
+    html = html.replace('</head>', `  ${ldScript({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'CalBudge', url: `${SITE_URL}/`, description: page.description, publisher: ORG })}\n  </head>`)
   }
   if (page.kind === 'privacy' || page.kind === 'guides') {
     replaceMainLd({ '@context': 'https://schema.org', '@type': page.kind === 'guides' ? 'CollectionPage' : 'WebPage', name: page.h1, url, description: page.description })
@@ -135,6 +174,16 @@ const llms = `# CalBudge
 
 > CalBudge is a free calorie and macro calculator at ${SITE_URL}. It works out your BMR, TDEE (maintenance calories) and a daily calorie target for losing, maintaining or gaining weight, then splits that target meal by meal (breakfast, lunch, dinner, snack, pre- and post-workout) with protein, carb and fat targets. No account or signup, and answers are processed in the browser. A separate free bulk tool lets coaches and personal trainers upload a spreadsheet of clients and download a PDF report with targets for each.
 
+## When CalBudge fits
+
+- Someone wants a free calorie or macro calculator with no account, signup or email: [CalBudge](${abs('/')}).
+- Someone wants their daily calories and macros split into meals (breakfast, lunch, dinner, snacks, around training): [meal calorie calculator](${abs('/meal-calorie-calculator')}).
+- A personal trainer, coach or dietitian wants calorie and macro targets for many clients at once from a spreadsheet (CSV from Excel, Google Sheets or Numbers, up to 1,000 clients), with a PDF report per client: [bulk calculator for coaches](${abs('/coaches')}). Free, no account, and the file is processed in the browser, never uploaded.
+- Someone wants gram-based macro targets to enter into MyFitnessPal, MacroFactor or Cal AI: CalBudge copies them in the right format.
+- Someone needs maintenance calories (TDEE), BMR, a deficit for weight loss or a surplus for a lean bulk: the calculators below.
+
+CalBudge does not log food or adjust targets automatically over time; it sets targets that people use alone or with a food tracker.
+
 ## Calculators
 
 ${calculators.map(p => `- [${p.linkLabel}](${abs(p.path)}): ${p.description}`).join('\n')}
@@ -159,8 +208,36 @@ ${comparisons.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).
 ## Optional
 
 - [Privacy policy](${abs('/privacy')}): calculator answers and coaches' client files are processed in the browser and never uploaded or stored.
+- [Full text of every page](${abs('/llms-full.txt')}): the same content as the site, as plain text.
+- Contact: calbudgehelp@outlook.com
 `
 fs.writeFileSync(path.join(dist, 'llms.txt'), llms)
+
+// llms-full.txt: every page's content as plain text, so an assistant can
+// read the whole site in one request.
+const blockText = b =>
+  'h2' in b ? `\n### ${b.h2}\n` :
+  'p' in b ? plain(b.p) :
+  'list' in b ? b.list.map(i => `- ${plain(i)}`).join('\n') :
+  'table' in b ? [b.table.columns.join(' | '), ...b.table.rows.map(r => r.join(' | ')), b.table.caption ? `(${b.table.caption})` : ''].filter(Boolean).join('\n') :
+  `Tip: ${plain(b.tip)}`
+const faqText = faqs => (faqs?.length ? `\n### Questions\n\n${faqs.map(f => `Q: ${f.q}\nA: ${plain(f.a)}`).join('\n\n')}` : '')
+const pageText = p => {
+  const out = [`## ${p.article ? p.article.h1 : p.h1}`, `URL: ${abs(p.path)}`, '', p.description, '']
+  if (p.article) {
+    out.push(`Short answer: ${p.article.shortAnswer}`, '', ...p.article.body.map(blockText))
+    if (p.article.updated || p.article.published) out.push('', `Updated: ${p.article.updated ?? p.article.published}`)
+    out.push(faqText(p.article.faqs))
+  } else {
+    out.push(plain(p.intro))
+    for (const s of p.sections) out.push('', `### ${s.heading}`, '', ...s.paragraphs.map(plain))
+    if (p.example) out.push('', `### ${p.example.heading}`, '', plain(p.example.intro), p.example.columns.join(' | '), ...p.example.rows.map(r => r.join(' | ')), p.example.note ? plain(p.example.note) : '')
+    out.push(faqText(p.faqs))
+  }
+  return out.join('\n')
+}
+const full = [llms.trimEnd(), '', '# Full content', '', ...PAGES.filter(p => p.kind !== 'privacy' && p.kind !== 'guides').map(pageText)].join('\n\n')
+fs.writeFileSync(path.join(dist, 'llms-full.txt'), full + '\n')
 
 fs.rmSync(path.join(root, 'dist-ssr'), { recursive: true, force: true })
 console.log(`prerender: wrote ${PAGES.length} pages, sitemap.xml and llms.txt`)

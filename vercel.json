@@ -72,6 +72,14 @@
     {
       "source": "/guides/calbudge-vs-cronometer",
       "destination": "/guides/calbudge-vs-cronometer.html"
+    },
+    {
+      "source": "/meal-calorie-calculator",
+      "destination": "/meal-calorie-calculator.html"
+    },
+    {
+      "source": "/guides/best-macro-calculator-for-personal-trainers",
+      "destination": "/guides/best-macro-calculator-for-personal-trainers.html"
     }
   ],
   "headers": [

@@ -360,7 +360,7 @@ const GUIDES: Article[] = [
         a: 'A calorie eaten at 9pm counts the same as one at noon. If late eating leads to overeating or poor sleep, shift some of it earlier, but there is no metabolic penalty in itself.',
       },
     ],
-    calculator: { path: '/', label: 'Get my meal split' },
+    calculator: { path: '/meal-calorie-calculator', label: 'Get my meal split' },
     related: ['how-much-protein-per-day', 'how-many-calories-to-lose-weight', 'bmr-vs-tdee'],
   },
   {
@@ -500,7 +500,7 @@ const GUIDES: Article[] = [
         tip: 'Keep the same method for every client. When everyone is calculated the same way, it is easier to spot who is responding differently.',
       },
       {
-        p: 'Clients often already use a tracking app. [This comparison of calculators and trackers](/guides/best-free-calorie-and-macro-calculators) shows how CalBudge targets fit MyFitnessPal, MacroFactor and Cronometer, so you can hand clients numbers in the app they know.',
+        p: 'Clients often already use a tracking app. [This comparison of calculators and trackers](/guides/best-free-calorie-and-macro-calculators) shows how CalBudge targets fit MyFitnessPal, MacroFactor and Cronometer, so you can hand clients numbers in the app they know. For the options for a whole roster, from spreadsheets to coaching platforms, see [macro calculators for coaches compared](/guides/best-macro-calculator-for-personal-trainers).',
       },
     ],
     faqs: [

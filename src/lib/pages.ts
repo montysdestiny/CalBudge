@@ -67,6 +67,10 @@ export const PAGES: LandingPage[] = [
         a: 'BMR (basal metabolic rate) is what your body burns at complete rest. TDEE is your BMR multiplied by an activity factor that accounts for training and daily movement, so it is always higher. More in [BMR vs TDEE](/guides/bmr-vs-tdee).',
       },
       {
+        q: 'Can CalBudge calculate macros for many clients at once?',
+        a: 'Yes. Coaches and personal trainers can upload a spreadsheet of clients to the free [bulk calculator](/coaches) and get every client’s calories, macros and meal split, with a PDF report. The file is processed in your browser and never uploaded.',
+      },
+      {
         q: 'How is CalBudge different from MyFitnessPal or MacroFactor?',
         a: 'Those are food trackers; CalBudge is a calculator. It works out your calorie and macro targets, in grams and meal by meal, for free and without an account, and copies them into your tracker. See [CalBudge vs MyFitnessPal](/guides/calbudge-vs-myfitnesspal), [CalBudge vs MacroFactor](/guides/calbudge-vs-macrofactor) or [how the free calculators compare](/guides/best-free-calorie-and-macro-calculators).',
       },
@@ -418,6 +422,67 @@ export const PAGES: LandingPage[] = [
     ],
   },
   {
+    path: '/meal-calorie-calculator',
+    ogTitle: 'Meal Calorie Calculator',
+    ogSubtitle: 'Split your calories and macros into meals',
+    linkLabel: 'Meal calorie calculator',
+    title: 'Meal Calorie Calculator: Split Calories & Macros Into Meals | CalBudge',
+    description:
+      'Free meal calorie calculator. Split your daily calories and macros into breakfast, lunch, dinner and snacks, with protein, carbs and fat for each meal. No signup.',
+    h1: 'Meal calorie calculator',
+    h1Accent: 'Meal',
+    intro:
+      'Find out how many calories and grams of protein, carbs and fat to eat at each meal. Works out your daily target first, then splits it across breakfast, lunch, dinner and snacks. Free, no signup.',
+    cta: 'Split my calories into meals',
+    sections: [
+      {
+        heading: 'How your calories are split into meals',
+        paragraphs: [
+          'CalBudge first works out your daily target from your [TDEE](/tdee-calculator) and goal. It then divides it across your day: breakfast about 18%, lunch 25%, dinner 25%, and the remaining 32% shared between a snack, a pre-workout meal and a post-workout meal. Your protein, carbohydrate and fat targets are split the same way, so every meal has its own macros.',
+          'Skip a meal and its calories move to the others in proportion to their size, so the shape of your day stays the same. Eat three meals and no snacks, and breakfast, lunch and dinner simply get bigger.',
+        ],
+      },
+      {
+        heading: 'Already know your daily calories?',
+        paragraphs: [
+          'Choose "Yes, I know my TDEE" at the start and enter it, and CalBudge goes straight to your goal and meal split. You can copy the result into MyFitnessPal, MacroFactor or Cal AI, or save it as an image or PDF. To plan a whole client list, coaches can use the [bulk calculator](/coaches), which includes a meal split for every client.',
+        ],
+      },
+    ],
+    example: {
+      heading: 'Example: 1,800 and 2,200 calories, split into meals',
+      intro: 'Here is how two daily targets split across a full day, four meals and three meals:',
+      columns: ['Daily target', 'Meals', 'Breakfast', 'Lunch', 'Dinner', 'Snacks'],
+      rows: [
+        ['1,800', '6 (with snack, pre- and post-workout)', '320', '450', '450', '3 × 195'],
+        ['1,800', '4 (one snack)', '410', '575', '575', '250'],
+        ['1,800', '3 (no snacks)', '475', '665', '665', '–'],
+        ['2,200', '6 (with snack, pre- and post-workout)', '395', '550', '550', '3 × 235'],
+        ['2,200', '4 (one snack)', '500', '700', '700', '300'],
+        ['2,200', '3 (no snacks)', '580', '810', '810', '–'],
+      ],
+      note: 'Meal sizes are rounded to the nearest 5 calories. For a 70 kg person on 1,800 calories, the daily macros are 126 g protein, 212 g carbohydrates and 50 g fat, divided across the meals in the same proportions.',
+    },
+    faqs: [
+      {
+        q: 'How many calories should I eat per meal?',
+        a: 'Divide your daily target across your meals. A common pattern, and the one CalBudge uses, is about 18% at breakfast, 25% at lunch, 25% at dinner and the rest across snacks. On 2,000 calories a day with three meals and no snacks, that is roughly 525 at breakfast and 735 each at lunch and dinner.',
+      },
+      {
+        q: 'Is there a free calculator that splits my calories and macros into meals?',
+        a: 'Yes. CalBudge is free with no signup: it works out your daily calories and macros, then gives breakfast, lunch, dinner and snack targets with protein, carbs and fat for each. You can remove any meal and the others adjust.',
+      },
+      {
+        q: 'Does meal timing matter for weight loss?',
+        a: 'Your daily total matters far more than when you eat. Split your calories in whatever way helps you stick to them: bigger meals if you get hungry, or a larger evening meal if that is when you eat with family.',
+      },
+      {
+        q: 'Should I eat before and after training?',
+        a: 'It can help performance and recovery, especially for longer or harder sessions. CalBudge includes optional pre- and post-workout meals; remove them if you train fasted or prefer to eat normal meals around your workout.',
+      },
+    ],
+  },
+  {
     path: '/coaches',
     kind: 'bulk',
     ogTitle: 'Bulk Macro Calculator for Coaches',
@@ -432,6 +497,13 @@ export const PAGES: LandingPage[] = [
       'Upload a spreadsheet of your clients and get calorie targets, macro splits and meal plans for all of them at once. Download a PDF report with a page per client, or a spreadsheet of results.',
     cta: 'Upload client file',
     sections: [
+      {
+        heading: 'A free macro calculator for all your clients at once',
+        paragraphs: [
+          'Most free macro calculators work one person at a time, and coaching platforms with built-in calculators are usually paid after a trial. CalBudge’s bulk calculator does a whole roster in one pass: put one client per row in a spreadsheet (name, sex, age, height, weight, sessions per week, goal and pace), upload it as a CSV, and every client gets their calorie target, maintenance (TDEE), BMR, macros and a meal split. It is free, with no account and up to 1,000 clients per file.',
+          'Use it instead of building your own formulas in Google Sheets or Excel: download the template, paste your clients in, and the calculations, safety limits and reports are done for you. Exports from Excel, Google Sheets and Numbers all work, in kg/cm or lb/inches.',
+        ],
+      },
       {
         heading: 'What the report includes',
         paragraphs: [
@@ -449,8 +521,16 @@ export const PAGES: LandingPage[] = [
     ],
     faqs: [
       {
+        q: 'Is there a free tool that calculates macros for all my clients at once from a spreadsheet?',
+        a: 'Yes. CalBudge’s bulk calculator takes a CSV of your clients (from Excel, Google Sheets or Numbers) and calculates every client’s calorie target, TDEE, BMR, macros and meal split in one go. It is free, needs no account, and handles up to 1,000 clients per file. You download a PDF report with a page per client, or a spreadsheet of results.',
+      },
+      {
         q: 'Is the bulk macro calculator free?',
-        a: 'Yes. There is no account, no client limit and no watermark on the reports.',
+        a: 'Yes. There is no account, no client limit beyond 1,000 rows per file, and no watermark on the reports.',
+      },
+      {
+        q: 'Is this better than a Google Sheets macro template?',
+        a: 'It saves building and checking the formulas. CalBudge applies Mifflin-St Jeor or Katch-McArdle, an activity factor from sessions and steps, safety floors on every cut, and a meal split, then lays out a client-ready PDF. A spreadsheet template is fine if you want to tweak the method per client.',
       },
       {
         q: 'Is my client data uploaded anywhere?',
