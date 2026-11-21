@@ -4,7 +4,7 @@
 // Adding a page? Also add its rewrite to vercel.json (the build checks).
 
 import type { Goal } from '@/lib/calc';
-import { ARTICLES, type Article, articlePath } from '@/lib/articles';
+import { ABOUT, ARTICLES, type Article, articlePath } from '@/lib/articles';
 
 export const SITE_URL = 'https://cal-budge.vercel.app';
 
@@ -28,7 +28,7 @@ export interface LandingPage {
   /** 'bulk' renders the coaches' CSV tool instead of the single-person
    *  calculator; 'privacy' renders the privacy policy; 'article' renders a
    *  guide from articles.ts; 'guides' is the list of guides. */
-  kind?: 'calculator' | 'bulk' | 'privacy' | 'article' | 'guides';
+  kind?: 'calculator' | 'bulk' | 'privacy' | 'article' | 'guides' | 'about';
   /** The guide shown on an 'article' page. */
   article?: Article;
   /** Goal pre-selected on the goal step when started from this page. */
@@ -383,6 +383,7 @@ export const PAGES: LandingPage[] = [
         paragraphs: [
           'On the results screen, choose "Export to app" to copy your calorie and macro targets in a format ready to paste into MyFitnessPal, MacroFactor or Cal AI. You can also download them as an image or PDF.',
           'Want gram-based macros without paying for MyFitnessPal Premium? Its free tier sets macro goals as percentages; CalBudge gives you the grams free. [CalBudge vs MyFitnessPal](/guides/calbudge-vs-myfitnesspal) explains how to use the two together.',
+          'Worked examples for common targets: macros for [1,500](/guides/macros-for-1500-calories), [1,800](/guides/macros-for-1800-calories), [2,000](/guides/macros-for-2000-calories), [2,200](/guides/macros-for-2200-calories), [2,500](/guides/macros-for-2500-calories) and [3,000 calories](/guides/macros-for-3000-calories) a day, at different bodyweights.',
         ],
       },
     ],
@@ -466,7 +467,7 @@ export const PAGES: LandingPage[] = [
     faqs: [
       {
         q: 'How many calories should I eat per meal?',
-        a: 'Divide your daily target across your meals. A common pattern, and the one CalBudge uses, is about 18% at breakfast, 25% at lunch, 25% at dinner and the rest across snacks. On 2,000 calories a day with three meals and no snacks, that is roughly 525 at breakfast and 735 each at lunch and dinner.',
+        a: 'Divide your daily target across your meals. A common pattern, and the one CalBudge uses, is about 18% at breakfast, 25% at lunch, 25% at dinner and the rest across snacks. On 2,000 calories a day with three meals and no snacks, that is about 530 at breakfast and 735 each at lunch and dinner (see [macros for 2,000 calories](/guides/macros-for-2000-calories)).',
       },
       {
         q: 'Is there a free calculator that splits my calories and macros into meals?',
@@ -569,6 +570,21 @@ export const PAGES: LandingPage[] = [
     intro: 'Straight answers on calories, protein and macros, with worked examples from the same formulas as the calculator.',
     cta: 'Calculate my budget',
     sections: [],
+  },
+  {
+    path: '/about',
+    kind: 'about',
+    article: ABOUT,
+    linkLabel: ABOUT.linkLabel,
+    title: ABOUT.title,
+    ogTitle: ABOUT.ogTitle,
+    ogSubtitle: ABOUT.ogSubtitle,
+    description: ABOUT.description,
+    h1: ABOUT.h1,
+    intro: ABOUT.dek,
+    cta: ABOUT.calculator.label,
+    sections: [],
+    faqs: ABOUT.faqs,
   },
   ...ARTICLES.map(
     (a): LandingPage => ({

@@ -80,6 +80,34 @@
     {
       "source": "/guides/best-macro-calculator-for-personal-trainers",
       "destination": "/guides/best-macro-calculator-for-personal-trainers.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/guides/macros-for-1500-calories",
+      "destination": "/guides/macros-for-1500-calories.html"
+    },
+    {
+      "source": "/guides/macros-for-1800-calories",
+      "destination": "/guides/macros-for-1800-calories.html"
+    },
+    {
+      "source": "/guides/macros-for-2000-calories",
+      "destination": "/guides/macros-for-2000-calories.html"
+    },
+    {
+      "source": "/guides/macros-for-2200-calories",
+      "destination": "/guides/macros-for-2200-calories.html"
+    },
+    {
+      "source": "/guides/macros-for-2500-calories",
+      "destination": "/guides/macros-for-2500-calories.html"
+    },
+    {
+      "source": "/guides/macros-for-3000-calories",
+      "destination": "/guides/macros-for-3000-calories.html"
     }
   ],
   "headers": [

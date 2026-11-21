@@ -4,7 +4,9 @@
 // Every worked number here comes from src/lib/calc.ts; update both together.
 // Copy supports [label](/path) links, like pages.ts.
 
+import { CALORIE_PAGES } from '@/lib/calorieTargets';
 import { COMPARISONS } from '@/lib/comparisons';
+import type { SourceId } from '@/lib/sources';
 
 export type ArticleBlock =
   | { h2: string }
@@ -37,6 +39,12 @@ export interface Article {
   related: string[];
   /** Comparison pages are listed separately from guides. */
   comparison?: boolean;
+  /** Pages in a series ("macros for N calories") get their own list. */
+  series?: 'calories';
+  /** The About page: no guide byline or breadcrumb. */
+  about?: boolean;
+  /** Published sources, listed under References (src/lib/sources.ts). */
+  sources?: SourceId[];
 }
 
 const GUIDES: Article[] = [
@@ -129,6 +137,7 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/calorie-deficit-calculator', label: 'Calculate my deficit' },
     related: ['not-losing-weight-in-calorie-deficit', 'bmr-vs-tdee', 'how-much-protein-per-day'],
+    sources: ['mifflin1990', 'frankenfield2005', 'helms2014', 'hall2011'],
   },
   {
     slug: 'how-much-protein-per-day',
@@ -208,6 +217,7 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/macro-calculator', label: 'Calculate my macros' },
     related: ['how-many-calories-to-lose-weight', 'how-to-split-calories-across-meals', 'how-to-calculate-macros-for-clients'],
+    sources: ['jager2017', 'morton2018', 'schoenfeld2018'],
   },
   {
     slug: 'bmr-vs-tdee',
@@ -280,6 +290,7 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/tdee-calculator', label: 'Calculate my TDEE' },
     related: ['how-many-calories-to-lose-weight', 'how-much-protein-per-day', 'not-losing-weight-in-calorie-deficit'],
+    sources: ['mifflin1990', 'frankenfield2005', 'katch'],
   },
   {
     slug: 'how-to-split-calories-across-meals',
@@ -362,6 +373,7 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/meal-calorie-calculator', label: 'Get my meal split' },
     related: ['how-much-protein-per-day', 'how-many-calories-to-lose-weight', 'bmr-vs-tdee'],
+    sources: ['schoenfeld2018', 'jager2017'],
   },
   {
     slug: 'not-losing-weight-in-calorie-deficit',
@@ -439,6 +451,7 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/calorie-deficit-calculator', label: 'Recalculate my deficit' },
     related: ['how-many-calories-to-lose-weight', 'bmr-vs-tdee', 'how-much-protein-per-day'],
+    sources: ['hall2011', 'helms2014'],
   },
   {
     slug: 'how-to-calculate-macros-for-clients',
@@ -519,11 +532,82 @@ const GUIDES: Article[] = [
     ],
     calculator: { path: '/coaches', label: 'Open the bulk calculator' },
     related: ['how-much-protein-per-day', 'how-many-calories-to-lose-weight', 'not-losing-weight-in-calorie-deficit'],
+    sources: ['mifflin1990', 'frankenfield2005', 'katch', 'jager2017', 'iom2005'],
   },
 ];
 
-/** Guides first, then the comparison pages (src/lib/comparisons.ts). */
-export const ARTICLES: Article[] = [...GUIDES, ...COMPARISONS];
+/** Guides, then comparisons (src/lib/comparisons.ts), then the calorie series (src/lib/calorieTargets.ts). */
+export const ARTICLES: Article[] = [...GUIDES, ...COMPARISONS, ...CALORIE_PAGES];
+
+/** The About page (/about): who runs CalBudge, how it works, and its sources. */
+export const ABOUT: Article = {
+  slug: 'about',
+  linkLabel: 'About CalBudge',
+  title: 'About CalBudge: How the Calculator Works and Who It’s For | CalBudge',
+  description:
+    'What CalBudge is, how its calorie and macro numbers are calculated, the published research behind the formulas, how your data is handled, and how to get in touch.',
+  h1: 'About CalBudge',
+  dek: 'A free calorie and macro calculator built to give people, and the coaches who work with them, numbers they can plan around.',
+  ogTitle: 'About CalBudge',
+  ogSubtitle: 'How it works and who it’s for',
+  published: '2026-11-21',
+  readMinutes: 4,
+  shortAnswer:
+    'CalBudge is a free, independent calorie and macro calculator. It estimates your BMR and TDEE with published equations, sets a daily target for your goal with a safety floor, and splits it into meals with protein, carb and fat targets. It needs no account, processes your answers in your browser, and offers a free bulk version for coaches.',
+  body: [
+    { h2: 'What CalBudge does' },
+    {
+      p: 'Most calorie calculators stop at a single number. CalBudge goes one step further and turns that number into a day you can plan: a target for each meal, with protein, carbohydrate and fat. You can copy the result into a tracking app such as MyFitnessPal, MacroFactor or Cal AI, or save it as an image or PDF.',
+    },
+    {
+      p: 'Coaches and personal trainers can use the [bulk calculator](/coaches) to do the same for a whole client list from one spreadsheet, with a PDF report for every client.',
+    },
+    { h2: 'How the numbers are worked out' },
+    {
+      list: [
+        'BMR (energy at rest): the Mifflin-St Jeor equation, which systematic reviews have found the most reliable for healthy adults; Katch-McArdle when you know your body fat; or a BMR you already know.',
+        'TDEE (maintenance): BMR multiplied by an activity factor from 1.2 to 1.9, set from your gym and cardio sessions per week and adjusted for daily steps.',
+        'Goal: 10%, 20% or 27.5% below TDEE to lose weight, or 10%, 20% or 25% above it to gain. A weight-loss target never goes below 1.2 times your BMR or 1,200 calories a day.',
+        'Macros: protein at 1.8 g per kg of bodyweight, within the 1.6 to 2.2 g/kg range recommended for people who train; fat at 25% of calories, within the 20 to 35% acceptable range; carbohydrates for the rest.',
+        'Meals: about 18% of calories at breakfast, 25% each at lunch and dinner, and the rest across a snack and food around training. Remove a meal and its calories move to the others.',
+      ],
+    },
+    {
+      p: 'Every guide on this site uses the same code as the calculator for its worked examples, so the numbers always match. The full method, with formulas, is also published in plain text at [llms.txt](/llms.txt).',
+    },
+    { h2: 'Your data' },
+    {
+      p: 'Your answers are processed in your browser and are not sent to or stored on a server. Coaches’ client files are read on their own device and never uploaded. Analytics cookies are only used if you accept them. Details are in the [privacy policy](/privacy).',
+    },
+    { h2: 'Independence' },
+    {
+      p: 'CalBudge is free and has no ads. It is not affiliated with MyFitnessPal, MacroFactor, Cal AI, Cronometer or any other app it mentions, and it does not sell supplements or diet plans. Comparisons with other tools are based on their public information and dated, and are corrected when that information changes.',
+    },
+    { h2: 'Limits' },
+    {
+      p: 'Every calorie formula gives an estimate, not a measurement. Treat your number as a starting point, check your weekly average weight after two to three weeks and adjust by 100 to 200 calories. CalBudge is general information, not medical advice: if you have a medical condition, are pregnant or have a history of disordered eating, talk to a doctor or registered dietitian before changing how you eat.',
+    },
+    { h2: 'Contact and corrections' },
+    {
+      p: 'Questions, feedback or a correction to report? Email calbudgehelp@outlook.com. Corrections are made promptly and the page’s date is updated.',
+    },
+  ],
+  faqs: [
+    {
+      q: 'Is CalBudge free?',
+      a: 'Yes. The calculator, the guides and the bulk calculator for coaches are all free, with no account and no ads.',
+    },
+    {
+      q: 'Where do CalBudge’s formulas come from?',
+      a: 'From published research: the Mifflin-St Jeor and Katch-McArdle equations for resting energy, and the International Society of Sports Nutrition’s position on protein. The sources are listed on this page.',
+    },
+  ],
+  calculator: { path: '/', label: 'Open the calculator' },
+  related: ['bmr-vs-tdee', 'how-much-protein-per-day', 'how-to-calculate-macros-for-clients'],
+  sources: ['mifflin1990', 'frankenfield2005', 'katch', 'jager2017', 'morton2018', 'iom2005'],
+  about: true,
+};
+
 
 export const articlePath = (slug: string) => `/guides/${slug}`;
 export const findArticle = (slug: string) => ARTICLES.find(a => a.slug === slug);

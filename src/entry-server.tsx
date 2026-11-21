@@ -4,6 +4,7 @@ import App from './App.tsx'
 import { PAGES, SITE_URL, findPage } from './lib/pages'
 
 export { PAGES, SITE_URL }
+export { SOURCES } from './lib/sources'
 
 // Used at build time only (scripts/prerender.mjs) to bake each landing
 // page's HTML into dist/, so crawlers that don't run JS still see content.

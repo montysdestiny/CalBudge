@@ -123,7 +123,7 @@ export default function App({ page }: { page: LandingPage }) {
   const imperial = state.unitSystem === 'imperial';
   const isBulk = page.kind === 'bulk';
   const isPrivacy = page.kind === 'privacy';
-  const isGuide = page.kind === 'article' || page.kind === 'guides';
+  const isGuide = page.kind === 'article' || page.kind === 'guides' || page.kind === 'about';
   // Pages without the single-person wizard: the logo just goes home.
   const standalone = isBulk || isPrivacy || isGuide;
 
@@ -247,7 +247,7 @@ export default function App({ page }: { page: LandingPage }) {
           <BulkEstimator page={page} />
         ) : isPrivacy ? (
           <PrivacyPolicy onCookieSettings={() => setCookieBannerOpen(true)} />
-        ) : page.kind === 'article' ? (
+        ) : page.kind === 'article' || page.kind === 'about' ? (
           <ArticlePage page={page} />
         ) : page.kind === 'guides' ? (
           <GuidesIndex page={page} />
@@ -437,7 +437,7 @@ export default function App({ page }: { page: LandingPage }) {
           <nav aria-label="Guides">
             <div className="text-sm font-medium text-ink">Guides</div>
             <ul className="mt-3 space-y-2 text-sm">
-              {ARTICLES.filter(a => !a.comparison).map(a => (
+              {ARTICLES.filter(a => !a.comparison && !a.series).map(a => (
                 <li key={a.slug}>
                   <a href={articlePath(a.slug)} className="hover:text-ink">{a.linkLabel}</a>
                 </li>
@@ -454,6 +454,7 @@ export default function App({ page }: { page: LandingPage }) {
             <div className="text-sm font-medium text-ink">About your data</div>
             <p className="mt-3 text-sm leading-relaxed">Your answers and client files stay in your browser. Nothing is uploaded or stored.</p>
             <div className="mt-3 flex flex-col items-start gap-2 text-sm">
+              <a href="/about" className="underline underline-offset-2 hover:text-ink">About CalBudge</a>
               <a href="/privacy" className="underline underline-offset-2 hover:text-ink">Privacy policy</a>
               <button
                 type="button"

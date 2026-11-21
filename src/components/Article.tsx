@@ -4,6 +4,7 @@ import RichText from '@/components/RichText';
 import { Container, revealDelay } from '@/components/Section';
 import { ARTICLES, type Article, type ArticleBlock, articlePath, findArticle } from '@/lib/articles';
 import type { LandingPage } from '@/lib/pages';
+import { SOURCES } from '@/lib/sources';
 
 // Guide pages (kind 'article') and the guides index (kind 'guides'). Fully
 // prerendered: no wizard here, the CTA links to the matching calculator.
@@ -120,13 +121,16 @@ export function ArticlePage({ page }: { page: LandingPage }) {
   return (
     <article>
       <Container className="max-w-3xl pt-12 sm:pt-16">
-        <nav aria-label="Breadcrumb" className="text-sm text-hint-text">
-          <a href="/guides" className="hover:text-ink">Guides</a>
-        </nav>
+        {!a.about && (
+          <nav aria-label="Breadcrumb" className="text-sm text-hint-text">
+            <a href="/guides" className="hover:text-ink">Guides</a>
+          </nav>
+        )}
         <h1 className="mt-3 text-[2.25rem] leading-[1.08] font-medium tracking-[-0.03em] text-balance text-ink sm:text-[3rem]">{a.h1}</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-text">{a.dek}</p>
         <p className="mt-4 text-sm text-hint-text">
-          By CalBudge · <time dateTime={a.updated ?? a.published}>{a.updated ? 'Updated ' : ''}{formatDate(a.updated ?? a.published)}</time> · {a.readMinutes} min read
+          {a.about ? 'Updated ' : <>By <a href="/about" className="underline decoration-line underline-offset-2 hover:text-ink">CalBudge</a> · {a.updated ? 'Updated ' : ''}</>}
+          <time dateTime={a.updated ?? a.published}>{formatDate(a.updated ?? a.published)}</time> · {a.readMinutes} min read
         </p>
 
         <section aria-labelledby="short-answer" className="mt-8 rounded-2xl bg-card p-6 shadow-ring">
@@ -141,6 +145,28 @@ export function ArticlePage({ page }: { page: LandingPage }) {
         {a.body.map((block, i) => (
           <Block key={i} block={block} />
         ))}
+
+        {a.sources && a.sources.length > 0 && (
+          <section aria-labelledby="references" className="mt-12">
+            <h2 id="references" className="text-lg font-medium text-ink">References</h2>
+            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-muted-text">
+              {a.sources.map(id => {
+                const s: { text: string; url?: string } = SOURCES[id];
+                return (
+                  <li key={id}>
+                    {s.text}
+                    {s.url && (
+                      <>
+                        {' '}
+                        <a href={s.url} rel="noopener" className="break-all underline decoration-line underline-offset-2 hover:text-ink">{s.url.replace('https://', '')}</a>
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        )}
 
         <p className="mt-12 border-t border-line pt-5 text-sm leading-relaxed text-hint-text">
           This guide is general information, not medical advice. If you have a medical condition, are pregnant or have a
@@ -175,7 +201,7 @@ export function GuidesIndex({ page }: { page: LandingPage }) {
         <h1 className="text-[2.5rem] leading-[1.05] font-medium tracking-[-0.03em] text-ink sm:text-[3.5rem]">{page.h1}</h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-text">{page.intro}</p>
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ARTICLES.filter(a => !a.comparison).map((a, i) => (
+          {ARTICLES.filter(a => !a.comparison && !a.series).map((a, i) => (
             <GuideCard key={a.slug} article={a} index={i} />
           ))}
         </ul>
@@ -184,6 +210,15 @@ export function GuidesIndex({ page }: { page: LandingPage }) {
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {ARTICLES.filter(a => a.comparison).map((a, i) => (
             <GuideCard key={a.slug} article={a} index={i} />
+          ))}
+        </ul>
+        <h2 className="mt-16 text-[1.75rem] leading-tight font-medium tracking-tight text-ink">Macros by calorie target</h2>
+        <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-text">Protein, carbs and fat for common daily targets, at different bodyweights, and how to split each into meals.</p>
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {ARTICLES.filter(a => a.series === 'calories').map(a => (
+            <li key={a.slug}>
+              <a href={articlePath(a.slug)} className="inline-block rounded-full bg-card px-4 py-2 text-sm font-medium text-ink shadow-ring hover:shadow-[0_0_0_1px_var(--color-ink)]">{a.linkLabel}</a>
+            </li>
           ))}
         </ul>
       </Container>

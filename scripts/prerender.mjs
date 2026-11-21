@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url'
 
 const root = path.resolve(import.meta.dirname, '..')
 const dist = path.join(root, 'dist')
-const { render, PAGES, SITE_URL } = await import(pathToFileURL(path.join(root, 'dist-ssr/entry-server.js')).href)
+const { render, PAGES, SITE_URL, SOURCES } = await import(pathToFileURL(path.join(root, 'dist-ssr/entry-server.js')).href)
 
 // Each landing page needs a rewrite in vercel.json, or Vercel will 404 it.
 // (Explicit rewrites rather than cleanUrls, which would also redirect the
@@ -30,7 +30,18 @@ const abs = p => (p === '/' ? `${SITE_URL}/` : `${SITE_URL}${p}`)
 const ldScript = obj => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
 
 const isCalculator = p => !p.kind || p.kind === 'calculator' || p.kind === 'bulk'
-const ORG = { '@type': 'Organization', name: 'CalBudge', url: `${SITE_URL}/`, email: 'calbudgehelp@outlook.com' }
+// Add profile URLs (Product Hunt, YouTube, social accounts) to SAME_AS as
+// they are created: it tells search engines they all belong to CalBudge.
+const SAME_AS = []
+const ORG = {
+  '@type': 'Organization',
+  name: 'CalBudge',
+  url: `${SITE_URL}/`,
+  logo: `${SITE_URL}/favicon.svg`,
+  email: 'calbudgehelp@outlook.com',
+  ...(SAME_AS.length ? { sameAs: SAME_AS } : {}),
+}
+const citations = ids => (ids ?? []).map(id => ({ '@type': 'CreativeWork', name: SOURCES[id].text, ...(SOURCES[id].url ? { url: SOURCES[id].url } : {}) }))
 const CALCULATOR_FEATURES = [
   'BMR with Mifflin-St Jeor, Katch-McArdle (with body fat) or a known BMR',
   'TDEE from gym and cardio sessions per week and daily steps',
@@ -107,9 +118,12 @@ for (const page of PAGES) {
   if (page.kind === 'privacy' || page.kind === 'guides') {
     replaceMainLd({ '@context': 'https://schema.org', '@type': page.kind === 'guides' ? 'CollectionPage' : 'WebPage', name: page.h1, url, description: page.description })
   }
+  if (page.kind === 'about') {
+    replaceMainLd({ '@context': 'https://schema.org', '@type': 'AboutPage', name: page.h1, url, description: page.description, dateModified: page.article.updated ?? page.article.published, about: ORG, citation: citations(page.article.sources) })
+  }
   if (page.kind === 'article') {
     const a = page.article
-    const org = { '@type': 'Organization', name: 'CalBudge', url: `${SITE_URL}/` }
+    const org = { ...ORG, '@id': `${SITE_URL}/about` }
     replaceMainLd({
       '@context': 'https://schema.org',
       '@type': 'Article',
@@ -124,6 +138,7 @@ for (const page of PAGES) {
       author: org,
       publisher: org,
       inLanguage: 'en',
+      ...(a.sources?.length ? { citation: citations(a.sources) } : {}),
     })
     html = setTag(html, /(<meta property="og:type" content=")[^"]*(")/, 'article')
   }
@@ -168,7 +183,8 @@ fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap)
 // their crawlers. Built from PAGES so it never goes stale; the method section
 // mirrors src/lib/calc.ts.
 const calculators = PAGES.filter(p => !p.kind || p.kind === 'calculator' || p.kind === 'bulk')
-const guides = PAGES.filter(p => p.kind === 'article' && !p.article.comparison)
+const guides = PAGES.filter(p => p.kind === 'article' && !p.article.comparison && !p.article.series)
+const calorieTargets = PAGES.filter(p => p.kind === 'article' && p.article.series === 'calories')
 const comparisons = PAGES.filter(p => p.kind === 'article' && p.article.comparison)
 const llms = `# CalBudge
 
@@ -196,6 +212,10 @@ ${guides.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join(
 
 ${comparisons.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join('\n')}
 
+## Macros by calorie target
+
+${calorieTargets.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).join('\n')}
+
 ## Method
 
 - BMR: Mifflin-St Jeor (10 × weight kg + 6.25 × height cm − 5 × age, +5 for men, −161 for women), or Katch-McArdle (370 + 21.6 × lean mass kg) when body fat percentage is given, or a BMR the user already knows.
@@ -207,6 +227,7 @@ ${comparisons.map(p => `- [${p.h1}](${abs(p.path)}): ${p.article.shortAnswer}`).
 
 ## Optional
 
+- [About CalBudge](${abs('/about')}): who it is for, the method and the published sources behind it, independence and contact.
 - [Privacy policy](${abs('/privacy')}): calculator answers and coaches' client files are processed in the browser and never uploaded or stored.
 - [Full text of every page](${abs('/llms-full.txt')}): the same content as the site, as plain text.
 - Contact: calbudgehelp@outlook.com
